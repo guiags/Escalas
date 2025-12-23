@@ -13,7 +13,14 @@ class Escala extends Model
         'turno',
         'servico',
         'vagas_necessarias',
+        'atividade_id', 
+        'observacao'
     ];
+
+    public function atividade()
+    {
+        return $this->belongsTo(Atividade::class);
+    }
 
     public function soldados()
     {

@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('turno'); // Ex: Manhã, Tarde, Noite
             $table->string('servico'); // Ex: Patrulhamento, Administrativo
             $table->integer('vagas_necessarias');
+            $table->foreignId('atividade_id')->constrained('atividades'); // Liga à regra
+            $table->text('observacao')->nullable();
             $table->timestamps();
         });
     }

@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Escala;
 use App\Models\Soldado;
+use App\Models\Atividade;
+use Illuminate\Support\Facades\DB;
 
 class EscalaController extends Controller
 {
@@ -127,4 +129,83 @@ class EscalaController extends Controller
     {
         //
     }
+
+    public function gerarEscalaAutomatica(Request $request)
+    {
+    // 1. Receber dados da escala a ser criada
+    $data = $request->input('data');
+    $atividadeId = $request->input('atividade_id');
+    
+    $atividade = Atividade::findOrFail($atividadeId);
+    
+    // Regras da Atividade
+    $qtdeNecessaria = $atividade->quantidade_padrao;
+    $sexoRestrito = $atividade->sexo_restrito; // 'M', 'F' ou null
+    
+    // 2. Query Base de Soldados Disponíveis
+    $query = Soldado::query()->where('disponivel', true);
+
+    // Filtro de Sexo (se a atividade exigir)
+    if ($sexoRestrito) {
+        $query->where('sexo', $sexoRestrito);
+    }
+
+    // Filtro: Não pode estar escalado em outra atividade no MESMO dia
+    $query->whereDoesntHave('escalas', function($q) use ($data) {
+        $q->where('data', $data);
+    });
+
+    // 3. Algoritmo de Prioridade (Menos Escalados Primeiro)
+    // Precisamos calcular as horas totais via query para ordenar
+    // Isso soma a carga_horaria de todas as atividades que o soldado já fez
+    $candidatos = $query->withSum(['escalas as horas_totais' => function($q) {
+        $q->join('atividades', 'escalas.atividade_id', '=', 'atividades.id')
+          ->select(DB::raw('COALESCE(SUM(atividades.carga_horaria), 0)'));
+    }], 'horas_totais')
+    ->orderBy('horas_totais', 'asc') // Os menos cansados primeiro
+    ->get();
+
+    // 4. Seleção com Diversidade de Turma
+    $selecionados = collect();
+    $turmasSelecionadas = [];
+
+    foreach ($candidatos as $soldado) {
+        if ($selecionados->count() >= $qtdeNecessaria) {
+            break;
+        }
+
+        // Tenta priorizar turmas diferentes, mas se não tiver opção, repete
+        // Lógica: Se a turma ainda não foi selecionada OU se já rodamos todos e ainda falta gente
+        if (!in_array($soldado->turma, $turmasSelecionadas)) {
+            $selecionados->push($soldado);
+            $turmasSelecionadas[] = $soldado->turma;
+        } else {
+            // Se chegamos aqui, é porque todos os candidatos "ideais" (turma nova) acabaram
+            // Podemos colocar numa lista de espera ou aceitar repetir turma se necessário
+            // Para simplificar, vou permitir repetir se não houver opção melhor depois:
+             continue; 
+        }
+    }
+    
+    // Se não preencheu com turmas distintas, preenche com o restante da lista ordenada
+    if ($selecionados->count() < $qtdeNecessaria) {
+        $faltantes = $qtdeNecessaria - $selecionados->count();
+        $idsJaSelecionados = $selecionados->pluck('id')->toArray();
+        
+        $extras = $candidatos->whereNotIn('id', $idsJaSelecionados)->take($faltantes);
+        $selecionados = $selecionados->merge($extras);
+    }
+
+    // 5. Salvar a Escala
+    $escala = Escala::create([
+        'data' => $data,
+        'atividade_id' => $atividade->id,
+    ]);
+
+    // Anexar os IDs dos soldados selecionados
+    $escala->soldados()->attach($selecionados->pluck('id'));
+
+    return redirect()->back()->with('success', 'Escala gerada com ' . $selecionados->count() . ' militares.');
+}
+
 }
