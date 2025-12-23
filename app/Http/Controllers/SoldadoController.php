@@ -13,7 +13,12 @@ class SoldadoController extends Controller
      */
     public function index()
     {
-        $soldados = Soldado::orderBy('nome_guerra')->get(); // Busca todos, ordenados pelo Nome de Guerra
+
+        $soldados = Soldado::all()->map(function($soldado) {
+            $soldado->horas_totais = $soldado->total_horas; 
+            return $soldado;
+        });
+        
         return view('soldados.index', compact('soldados'));
     }
 
@@ -30,19 +35,23 @@ class SoldadoController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validação dos Dados
-        $validatedData = $request->validate([
-            'numero_policia' => 'required|string|unique:soldados,numero_policia|max:255',
-            'numero_curso'   => 'nullable|string|max:255',
-            'nome_guerra'    => 'required|string|max:255',
-            'nome_completo'  => 'required|string|max:255',
+        // 1. Validação dos dados
+        $validated = $request->validate([
+            'nome_completo' => 'required|string|max:255',
+            'nome_guerra'   => 'required|string|max:255',
+            'matricula'     => 'required|string|unique:soldados,matricula',
+            'graduacao'     => 'required|string',
+            'turma'         => 'required|string', // Ex: CFsd 2024
+            'sexo'          => 'required|in:M,F',
+            'numero_bone'   => 'nullable|string',
         ]);
 
-        // 2. Criação no Banco de Dados
-        Soldado::create($validatedData);
+        // 2. Criação do registro no banco
+        Soldado::create($validated);
 
-        // 3. Redirecionamento com Mensagem de Sucesso
-        return redirect()->route('soldados.index')->with('success', 'Soldado cadastrado com sucesso!');
+        // 3. Redirecionamento com mensagem de sucesso
+        return redirect()->route('soldados.index')
+                         ->with('success', 'Soldado cadastrado com sucesso!');
     }
 
     /**
@@ -61,32 +70,35 @@ class SoldadoController extends Controller
         return view('soldados.edit', compact('soldado'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Soldado $soldado)
-    {
-        // 1. Validação dos Dados
-        $validatedData = $request->validate([
-        // O campo 'numero_policia' deve ser único, exceto para o soldado atual.
-        'numero_policia' => 'required|string|max:255|unique:soldados,numero_policia,' . $soldado->id,
-        'numero_curso'   => 'nullable|string|max:255',
-        'nome_guerra'    => 'required|string|max:255',
-        'nome_completo'  => 'required|string|max:255',
+public function update(Request $request, Soldado $soldado)
+{
+    $validated = $request->validate([
+        'nome_completo' => 'required|string|max:255',
+        'nome_guerra'   => 'required|string|max:255',
+        // Ignora a matrícula do próprio soldado na verificação de único
+        'matricula'     => 'required|string|unique:soldados,matricula,' . $soldado->id,
+        'graduacao'     => 'required|string',
+        'turma'         => 'required|string',
+        'sexo'          => 'required|in:M,F',
+        'numero_bone'   => 'nullable|string',
+        'disponivel'    => 'boolean',
     ]);
 
-        // 2. Atualização no Banco de Dados
-        $soldado->update($validatedData);
+    // O checkbox não envia nada se desmarcado, então forçamos o valor booleano
+    $validated['disponivel'] = $request->has('disponivel');
 
-        // 3. Redirecionamento com Mensagem de Sucesso
-        return redirect()->route('soldados.index')->with('success', 'Soldado ' . $soldado->nome_guerra . ' atualizado com sucesso!');
-    }
+    $soldado->update($validated);
+
+    return redirect()->route('soldados.index')
+                     ->with('success', 'Dados do militar atualizados com sucesso!');
+}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(soldado $soldado)
     {
-        //
+        $soldado->delete();
+        return redirect()->route('soldados.index')->with('success', 'Militar removido.');
     }
 }

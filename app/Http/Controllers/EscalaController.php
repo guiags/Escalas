@@ -25,7 +25,8 @@ class EscalaController extends Controller
      */
     public function create()
     {
-        return view('escalas.create');
+        $atividades = \App\Models\Atividade::all();
+        return view('escalas.create', compact('atividades'));
     }
 
     /**
