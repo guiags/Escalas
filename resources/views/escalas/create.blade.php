@@ -1,63 +1,78 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Criar Nova Escala de Serviço') }}
+            {{ __('Gerar Nova Escala') }}
         </h2>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="p-6 sm:p-10 bg-white border-b border-gray-200">
-
-                    <div class="mb-4">
-                        <a href="{{ route('escalas.index') }}" class="text-blue-600 hover:text-blue-800 flex items-center">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                            Voltar para o Gerenciamento de Escalas
-                        </a>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6">
-                        Definir os detalhes do novo serviço
-                    </h3>
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    
+                    @if ($errors->any())
+                        <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                            <ul class="list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     <form method="POST" action="{{ route('escalas.store') }}">
                         @csrf
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
                             <div>
-                                <x-input-label for="data" :value="__('Data do Serviço')" />
-                                <x-text-input id="data" class="block mt-1 w-full" type="date" name="data" :value="old('data')" required autofocus />
-                                <x-input-error class="mt-2" :messages="$errors->get('data')" />
+                                <x-input-label for="data" :value="__('Data da Escala')" />
+                                <x-text-input id="data" class="block mt-1 w-full" type="date" name="data" :value="old('data')" required />
                             </div>
 
                             <div>
-                                <x-input-label for="turno" :value="__('Turno')" />
-                                <select id="turno" name="turno" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full" required>
-                                    <option value="">Selecione o Turno</option>
-                                    <option value="manha" {{ old('turno') == 'manha' ? 'selected' : '' }}>Manhã (Ex: 08:00 - 14:00)</option>
-                                    <option value="tarde" {{ old('turno') == 'tarde' ? 'selected' : '' }}>Tarde (Ex: 14:00 - 20:00)</option>
-                                    <option value="noite" {{ old('turno') == 'noite' ? 'selected' : '' }}>Noite (Ex: 20:00 - 08:00)</option>
+                                <x-input-label for="atividade_id" :value="__('Tipo de Serviço')" />
+                                <select name="atividade_id" id="atividade_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                                    <option value="">Selecione...</option>
+                                    @foreach($atividades as $atividade)
+                                        <option value="{{ $atividade->id }}" {{ old('atividade_id') == $atividade->id ? 'selected' : '' }}>
+                                            {{ $atividade->nome }} 
+                                            (Carga: {{ $atividade->carga_horaria }}h)
+                                        </option>
+                                    @endforeach
                                 </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('turno')" />
                             </div>
 
-                            <div>
-                                <x-input-label for="vagas_necessarias" :value="__('Vagas Necessárias (Efetivo)')" />
-                                <x-text-input id="vagas_necessarias" class="block mt-1 w-full" type="number" name="vagas_necessarias" :value="old('vagas_necessarias')" required min="1" />
-                                <x-input-error class="mt-2" :messages="$errors->get('vagas_necessarias')" />
+                            <div class="md:col-span-2 bg-gray-50 p-5 rounded-lg border border-gray-200 mt-2">
+                                <span class="block text-base font-semibold text-gray-800 mb-3">Como deseja gerar esta escala?</span>
+                                
+                                <div class="flex items-start mb-4">
+                                    <div class="flex items-center h-5">
+                                        <input id="modo_auto" type="radio" value="automatico" name="modo_geracao" class="w-4 h-4 text-green-600 border-gray-300 focus:ring-green-500" {{ old('modo_geracao', 'automatico') == 'automatico' ? 'checked' : '' }}>
+                                    </div>
+                                    <div class="ml-3 text-sm">
+                                        <label for="modo_auto" class="font-medium text-gray-900">Automático (Recomendado)</label>
+                                        <p class="text-gray-500">O sistema seleciona os militares com menos horas nesta atividade e tenta diversificar as turmas.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input id="modo_manual" type="radio" value="manual" name="modo_geracao" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500" {{ old('modo_geracao') == 'manual' ? 'checked' : '' }}>
+                                    </div>
+                                    <div class="ml-3 text-sm">
+                                        <label for="modo_manual" class="font-medium text-gray-900">Manual (Escala Vazia)</label>
+                                        <p class="text-gray-500">Cria uma escala em branco para você adicionar nomes manualmente. Ideal para <b>Xerife</b>, <b>Sub-Xerife</b> ou trocas específicas.</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="mt-6">
-                            <x-input-label for="servico" :value="__('Tipo de Serviço / Função')" />
-                            <x-text-input id="servico" class="block mt-1 w-full" type="text" name="servico" :value="old('servico')" required placeholder="Ex: Patrulhamento Motorizado, Atendimento ao Público, Administrativo" />
-                            <x-input-error class="mt-2" :messages="$errors->get('servico')" />
+
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
-                            <x-primary-button class="ml-4">
+                            <a href="{{ route('escalas.index') }}" class="text-gray-600 underline mr-4">Cancelar</a>
+                            
+                            <x-primary-button class="bg-green-600 hover:bg-green-700">
                                 {{ __('Criar Escala') }}
                             </x-primary-button>
                         </div>

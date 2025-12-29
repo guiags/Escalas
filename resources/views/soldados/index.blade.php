@@ -25,6 +25,7 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nº Curso</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matrícula</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Grad/Nome Guerra</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Turma</th>
@@ -37,6 +38,10 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($soldados as $soldado)
                                     <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
+                                            {{ $soldado->numero_bone}}
+                                        </td>
+
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $soldado->matricula }}
                                         </td>
@@ -62,7 +67,7 @@
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-700">
-                                            {{ $soldado->total_horas }} h
+                                            {{ $soldado->getTotalGeralAttribute() }} h
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <a href="{{ route('soldados.edit', $soldado->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>

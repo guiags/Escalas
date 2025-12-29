@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Atividade extends Model
 {
-    protected $fillable = ['nome', 'sexo_restrito', 'quantidade_padrao', 'carga_horaria'];
+    protected $fillable = ['nome', 'sexo_restrito', 'quantidade_padrao', 'carga_horaria', 
+    'observacao'];
     
     public function escalas()
     {

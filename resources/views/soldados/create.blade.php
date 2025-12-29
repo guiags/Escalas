@@ -69,6 +69,12 @@
                                 <x-text-input id="numero_bone" class="block mt-1 w-full" type="text" name="numero_bone" :value="old('numero_bone')" />
                             </div>
 
+                            <div>
+                                <x-input-label for="horas_iniciais" :value="__('Horas Iniciais (Banco Anterior)')" />
+                                <x-text-input id="horas_iniciais" class="block mt-1 w-full" type="number" name="horas_iniciais" :value="old('horas_iniciais', $soldado->horas_iniciais ?? 0)" />
+                                <p class="text-xs text-gray-500 mt-1">Saldo de horas trazido de outros sistemas (usado para desempate).</p>
+                            </div>
+
                         </div>
 
                         <div class="flex items-center justify-end mt-6">

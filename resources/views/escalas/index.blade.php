@@ -1,96 +1,95 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Gerenciamento de Escalas de Serviço') }}
-        </h2>
+        <div class="flex justify-between items-center">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Histórico de Escalas') }}
+            </h2>
+            <a href="{{ route('escalas.create') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                + Nova Escala
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-            @if (session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span class="block sm:inline">{{ session('success') }}</span>
+            
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
+            
+            @if(session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                    {{ session('error') }}
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="p-6 sm:p-10 bg-white border-b border-gray-200">
+            <form action="{{ route('escalas.imprimirEmMassa') }}" method="POST" target="_blank" id="form-impressao">
+                @csrf
 
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-semibold text-gray-900">Escalas Agendadas:</h3>
-                        <a href="{{ route('escalas.create') }}">
-                            <x-primary-button>
-                                {{ __('+ Criar Nova Escala') }}
-                            </x-primary-button>
-                        </a>
+                <div class="bg-white p-4 rounded-t-lg shadow-sm border-b flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="select-all" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                        <span class="text-sm text-gray-600">Selecionar Todos</span>
                     </div>
-
-                    @if ($escalas->isEmpty())
-                        <div class="text-center py-10 border border-gray-200 rounded-lg">
-                            <p class="text-lg text-gray-500">Nenhuma escala de serviço foi criada ainda.</p>
-                            <p class="text-gray-400 mt-2">Clique no botão "Criar Nova Escala" para começar.</p>
-                        </div>
-                    @else
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Data
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Turno
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Serviço
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Efetivo (Vagas)
-                                        </th>
-                                        <th scope="col" class="relative px-6 py-3">
-                                            Ações
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach ($escalas as $escala)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                {{ \Carbon\Carbon::parse($escala->data)->format('d/m/Y') }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 capitalize">
-                                                {{ $escala->turno }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $escala->servico }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{-- {{ $escala->soldados->count() }} / --}} {{ $escala->vagas_necessarias }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <a href="{{ route('escalas.show', $escala) }}" class="text-green-600 hover:text-green-900 mr-4 font-semibold">
-                                                    Gerenciar Soldados
-                                                </a>
-                                                <a href="{{ route('escalas.edit', $escala) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
-                                                
-                                                <form action="{{ route('escalas.destroy', $escala) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Tem certeza que deseja deletar esta escala e todos os soldados atribuídos a ela?')">
-                                                        Deletar
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
-
+                    
+                    <button type="submit" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded flex items-center text-sm disabled:opacity-50 disabled:cursor-not-allowed" id="btn-imprimir">
+                        🖨️ Imprimir Selecionados
+                    </button>
                 </div>
-            </div>
+
+                <div class="bg-white overflow-hidden shadow-sm rounded-b-lg">
+                    <div class="p-6 text-gray-900">
+                        
+                        @if($escalas->isEmpty())
+                            <div class="text-center text-gray-500 py-8">
+                                <p class="text-lg">Nenhuma escala registrada.</p>
+                            </div>
+                        @else
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                @foreach($escalas as $escala)
+                                    <div class="relative border rounded-lg p-4 shadow-sm border-l-4 border-green-500 bg-white hover:shadow-md transition group">
+                                        
+                                        <div class="absolute top-3 right-3">
+                                            <input type="checkbox" name="escalas_selecionadas[]" value="{{ $escala->id }}" class="escala-checkbox rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500 w-5 h-5 cursor-pointer">
+                                        </div>
+
+                                        <a href="{{ route('escalas.show', $escala->id) }}" class="block pr-8">
+                                            <div class="flex flex-col">
+                                                <h3 class="font-bold text-lg text-gray-800 hover:text-green-600">
+                                                    {{ $escala->atividade->nome ?? 'Atividade Removida' }}
+                                                </h3>
+                                                
+                                                <p class="text-gray-600 font-mono mt-1">
+                                                    {{ \Carbon\Carbon::parse($escala->data)->format('d/m/Y') }}
+                                                </p>
+                                                
+                                                <p class="text-xs text-gray-400 capitalize mb-2">
+                                                    {{ \Carbon\Carbon::parse($escala->data)->locale('pt_BR')->dayName }}
+                                                </p>
+
+                                                <span class="inline-block bg-green-100 text-green-800 text-xs font-bold px-2.5 py-1 rounded-full w-max">
+                                                    {{ $escala->soldados->count() }} Militares
+                                                </span>
+                                            </div>
+                                        </a>
+                                        
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
+
+    <script>
+        document.getElementById('select-all').addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.escala-checkbox');
+            checkboxes.forEach(cb => cb.checked = this.checked);
+        });
+    </script>
 </x-app-layout>

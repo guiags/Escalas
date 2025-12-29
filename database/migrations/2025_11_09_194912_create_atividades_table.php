@@ -16,7 +16,7 @@ return new class extends Migration
         $table->string('nome'); // Ex: "Limpeza Vestiário Feminino", "Plantão Claviculário"
         $table->enum('sexo_restrito', ['M', 'F'])->nullable(); // Null = Ambos permitidos
         $table->integer('quantidade_padrao')->default(1); // Quantos soldados precisa?
-        $table->integer('carga_horaria')->default(24); // Quantas horas conta para o banco de horas?
+        $table->integer('carga_horaria')->default(3); // Quantas horas conta para o banco de horas?
         $table->timestamps();
         });
     }

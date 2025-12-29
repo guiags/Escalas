@@ -10,7 +10,7 @@ class Soldado extends Model
 {
    protected $fillable = [
         'nome_completo', 'nome_guerra', 'matricula', 
-        'numero_bone', 'sexo', 'turma', 'graduacao', 'disponivel'
+        'numero_bone', 'sexo', 'turma', 'graduacao', 'disponivel', 'horas_iniciais'
     ];
 
     // Relacionamento com Escalas
@@ -19,14 +19,22 @@ class Soldado extends Model
         return $this->belongsToMany(Escala::class, 'escala_soldado');
     }
 
-    // Acessor para calcular horas totais automaticamente
-    // Uso no blade: $soldado->total_horas
-    public function getTotalHorasAttribute()
+    public function horasPorAtividade($atividadeId)
     {
-        // Carrega as escalas e soma a carga horária da atividade vinculada
         return $this->escalas()
+            ->where('atividade_id', $atividadeId)
+            ->join('atividades', 'escalas.atividade_id', '=', 'atividades.id')
+            ->sum('atividades.carga_horaria');
+    }
+
+    // Retorna o total geral (Histórico do sistema + Carga inicial lançada)
+    public function getTotalGeralAttribute()
+    {
+        $horasSistema = $this->escalas()
             ->with('atividade')
             ->get()
-            ->sum(fn($escala) => $escala->atividade->carga_horaria);
+            ->sum(fn($escala) => $escala->atividade->carga_horaria ?? 0);
+
+        return $horasSistema + $this->horas_iniciais;
     }
 }

@@ -17,7 +17,8 @@ class SoldadoController extends Controller
         $soldados = Soldado::all()->map(function($soldado) {
             $soldado->horas_totais = $soldado->total_horas; 
             return $soldado;
-        });
+        })
+        ->sortBy('numero_bone');
         
         return view('soldados.index', compact('soldados'));
     }
@@ -44,6 +45,7 @@ class SoldadoController extends Controller
             'turma'         => 'required|string', // Ex: CFsd 2024
             'sexo'          => 'required|in:M,F',
             'numero_bone'   => 'nullable|string',
+            'horas_iniciais' => 'nullable|integer|min:0',
         ]);
 
         // 2. Criação do registro no banco
@@ -82,6 +84,7 @@ public function update(Request $request, Soldado $soldado)
         'sexo'          => 'required|in:M,F',
         'numero_bone'   => 'nullable|string',
         'disponivel'    => 'boolean',
+        'horas_iniciais' => 'nullable|integer|min:0',
     ]);
 
     // O checkbox não envia nada se desmarcado, então forçamos o valor booleano

@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('escalas', function (Blueprint $table) {
             $table->id();
             $table->date('data');
-            $table->string('turno'); // Ex: Manhã, Tarde, Noite
-            $table->string('servico'); // Ex: Patrulhamento, Administrativo
-            $table->integer('vagas_necessarias');
+            $table->string('turno')->nullable(); // Ex: Manhã, Tarde, Noite
+            $table->string('servico')->nullable(); // Ex: Patrulhamento, Administrativo
+            $table->integer('vagas_necessarias')->nullable();
             $table->foreignId('atividade_id')->constrained('atividades'); // Liga à regra
             $table->text('observacao')->nullable();
             $table->timestamps();

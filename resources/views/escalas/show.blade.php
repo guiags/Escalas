@@ -1,106 +1,79 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Gerenciar Escala: ') . $escala->servico }}
-        </h2>
+        <div class="flex justify-between items-center print:hidden">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('Detalhes da Escala') }}
+            </h2>
+            <div class="flex space-x-2">
+                <a href="{{ route('escalas.edit', $escala->id) }}" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-4 rounded">
+                    ✏️ Editar / Ajustar
+                </a>
+                
+                <button onclick="window.print()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                    🖨️ Imprimir
+                </button>
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-
-            @if (session('success'))
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
-                    <span class="block sm:inline">{{ session('success') }}</span>
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
+            
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4 print:hidden">
+                    {{ session('success') }}
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 mb-8 border-l-4 border-blue-500">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">Detalhes do Serviço:</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <p><strong>Data:</strong> {{ \Carbon\Carbon::parse($escala->data)->format('d/m/Y') }}</p>
-                    <p><strong>Turno:</strong> <span class="capitalize">{{ $escala->turno }}</span></p>
-                    <p><strong>Serviço:</strong> {{ $escala->servico }}</p>
-                </div>
-                @php
-                    $atribuidos = $escala->soldados->count();
-                    $necessarios = $escala->vagas_necessarias;
-                    $restantes = $necessarios - $atribuidos;
-                    $cor_status = $atribuidos < $necessarios ? 'text-red-600' : 'text-green-600';
-                @endphp
-                <p class="mt-4 text-lg font-semibold {{ $cor_status }}">
-                    Efetivo: {{ $atribuidos }} de {{ $necessarios }} vagas preenchidas.
-                    @if ($restantes > 0)
-                        (Faltam {{ $restantes }} soldados)
-                    @endif
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-300 p-8">
                 
-                <div class="md:col-span-1 bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 h-fit">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Atribuir Soldado</h3>
-                    
-                    <form method="POST" action="{{ route('escalas.attachSoldier', $escala) }}">
-                        @csrf
-                        
-                        <div>
-                            <x-input-label for="soldado_id" :value="__('Selecione o Soldado')" />
-                            
-                            <select id="soldado_id" name="soldado_id" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block mt-1 w-full" required>
-                                <option value="">--- Selecionar ---</option>
-                                @foreach ($soldadosDisponiveis as $soldado)
-                                    <option value="{{ $soldado->id }}">{{ $soldado->nome_guerra }} ({{ $soldado->numero_policia }})</option>
-                                @endforeach
-                            </select>
-                            <x-input-error class="mt-2" :messages="$errors->get('soldado_id')" />
-                        </div>
-
-                        <div class="flex items-center justify-end mt-4">
-                            <x-primary-button class="ml-4">
-                                {{ __('Adicionar à Escala') }}
-                            </x-primary-button>
-                        </div>
-                    </form>
+                <div class="text-center border-b-2 border-gray-800 pb-4 mb-6">
+                    <h1 class="text-2xl font-bold uppercase tracking-wider">Escala de Serviço</h1>
+                    <h3 class="text-xl text-gray-600 mt-2">{{ $escala->atividade->nome }}</h3>
+                    <p class="text-lg font-mono mt-1">Data: {{ \Carbon\Carbon::parse($escala->data)->format('d/m/Y') }}</p>
                 </div>
 
-                <div class="md:col-span-2 bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Soldados Escalados</h3>
+                <table class="min-w-full border-collapse border border-gray-400">
+                    <thead>
+                        <tr class="bg-gray-100">
+                            <th class="border border-gray-400 px-4 py-2 text-left w-16">Ord</th>
+                            <th class="border border-gray-400 px-4 py-2 text-left">Graduação / Nome de Guerra</th>
+                            <th class="border border-gray-400 px-4 py-2 text-left">Turma</th>
+                            <th class="border border-gray-400 px-4 py-2 text-center w-32">Assinatura</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($escala->soldados as $index => $soldado)
+                            <tr>
+                                <td class="border border-gray-400 px-4 py-3 text-center">{{ $index + 1 }}</td>
+                                <td class="border border-gray-400 px-4 py-3 font-bold">
+                                    {{ $soldado->graduacao }} {{ $soldado->nome_guerra }}
+                                </td>
+                                <td class="border border-gray-400 px-4 py-3 text-sm text-gray-600">
+                                    {{ $soldado->turma }}
+                                </td>
+                                <td class="border border-gray-400 px-4 py-3"></td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
 
-                    @if ($escala->soldados->isEmpty())
-                        <p class="text-gray-500">Nenhum soldado atribuído a esta escala ainda.</p>
-                    @else
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome de Guerra</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N.º Polícia</th>
-                                        <th class="px-6 py-3">Remover</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach ($escala->soldados as $soldado)
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $soldado->nome_guerra }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $soldado->numero_policia }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <form action="{{ route('escalas.detachSoldier', $escala) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <input type="hidden" name="soldado_id" value="{{ $soldado->id }}">
-                                                    <button type="submit" class="text-red-600 hover:text-red-900 text-sm" onclick="return confirm('Confirmar remoção de {{ $soldado->nome_guerra }} desta escala?')">
-                                                        Remover
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    @endif
+                <div class="mt-8 text-sm text-gray-500">
+                    <p><b>Observações:</b> {{ $escala->observacao }}</p>
+                    <p class="mt-2">Carga Horária Computada: {{ $escala->atividade->carga_horaria }} horas.</p>
                 </div>
+
             </div>
+
+            <div class="mt-6 text-center print:hidden">
+                <form action="{{ route('escalas.destroy', $escala->id) }}" method="POST" onsubmit="return confirm('Deseja excluir esta escala? As horas serão removidas dos militares.')">
+                    @csrf
+                    @method('DELETE')
+                    <a href="{{ route('escalas.index') }}" class="text-blue-600 hover:underline mr-4">Voltar para Lista</a>
+                    <button type="submit" class="text-red-600 hover:text-red-900 font-semibold">Excluir Escala</button>
+                </form>
+            </div>
+
         </div>
     </div>
 </x-app-layout>

@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SoldadoController;
 use App\Http\Controllers\EscalaController;
+use App\Http\Controllers\AtividadeController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -48,5 +49,16 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::resource('atividades', AtividadeController::class);
+    // Rotas para Gerenciamento Manual da Escala
+    Route::get('/escalas/{escala}/editar', [EscalaController::class, 'edit'])->name('escalas.edit');
+    Route::post('/escalas/{escala}/adicionar-soldado', [EscalaController::class, 'adicionarSoldado'])->name('escalas.adicionarSoldado');
+    Route::delete('/escalas/{escala}/remover-soldado/{soldado}', [EscalaController::class, 'removerSoldado'])->name('escalas.removerSoldado');
+    Route::post('/escalas/imprimir-em-massa', [EscalaController::class, 'imprimirEmMassa'])->name('escalas.imprimirEmMassa');
+
+});
+
 
 require __DIR__.'/auth.php';
