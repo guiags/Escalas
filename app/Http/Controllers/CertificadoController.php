@@ -3,47 +3,87 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use FPDF; // Importa a classe FPDF
+//require 'vendor/autoload.php';
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 
 class CertificadoController extends Controller
 {
     public function gerar(Request $request)
     {
+        // Pega os dados que vieram do formulário
         $nome = $request->input('nome');
-        $data_certificado = $request->input('data');
+        $data = $request->input('data');
 
-        // Inicializa o FPDF em modo Paisagem (L), milímetros (mm), Papel A4
-        $pdf = new FPDF('L', 'mm', 'A4');
-        $pdf->AddPage();
-        $pdf->SetAutoPageBreak(false);
-
-        // 1. Inserir a Imagem de Fundo (deve estar na pasta public/)
-        $imagemPath = public_path('modelo.png');
-        if (file_exists($imagemPath)) {
-            // Desenha a imagem ocupando a página toda (297x210mm)
-            $pdf->Image($imagemPath, 0, 0, 297, 210);
-        }
-
-        // 2. Configurar a Data (Arial, tamanho 10 - conforme seu código anterior)
-        $pdf->SetFont('Arial', '', 10);
-        $pdf->SetTextColor(0, 0, 0); // Preto
-        // Posicionamento: top 55mm, right 40mm (ajustado para coordenadas FPDF)
-        $pdf->SetXY(0, 55); 
-        $pdf->Cell(257, 10, utf8_decode($data_certificado), 0, 0, 'R');
-
-        // 3. Configurar o Nome do Aluno
-        // Lógica de redimensionamento da fonte
-        $comprimento = strlen($nome);
-        $fontSize = ($comprimento <= 20) ? 40 : (($comprimento <= 35) ? 25 : 18);
         
-        $pdf->SetFont('Arial', 'B', $fontSize);
-        // Posicionamento: top 85mm, left 55mm
-        $pdf->SetXY(55, 85);
-        $pdf->Cell(0, 20, strtoupper(utf8_decode($nome)), 0, 0, 'L');
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $nome = $_POST['nome'];
+            $data_certificado = $_POST['data']; // Recebe a data do formulário
+            
+            // Lógica de redimensionamento do nome (mantida)
+            $comprimento = strlen($nome);
+            $fontSizeNome = ($comprimento <= 20) ? "40pt" : (($comprimento <= 35) ? "25pt" : "18pt");
 
-        // 4. Saída do PDF
-        return response($pdf->Output('S'), 200)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'inline; filename="certificado.pdf"');
+            $options = new Options();
+            $options->set('isRemoteEnabled', true);
+            $dompdf = new Dompdf($options);
+
+            // Conversão da imagem para Base64
+            $imagemPath = 'modelo.png';
+            $base64 = '';
+            if (file_exists($imagemPath)) {
+                $imgData = file_get_contents($imagemPath);
+                $base64 = 'data:image/' . pathinfo($imagemPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode($imgData);
+            }
+
+            $html = '
+            <html>
+            <head>
+                <style>
+                    @page { margin: 0; }
+                    body { margin: 0; padding: 0; font-family: "Arial", sans-serif; }
+                    .container { position: relative; width: 297mm; height: 210mm; }
+                    .fundo { position: absolute; width: 100%; height: 100%; z-index: -1; }
+                    
+                    /* Estilo do Nome */
+                    .nome-aluno {
+                        position: absolute;
+                        top: 85mm; 
+                        left: 55mm;
+                        width: 100%;
+                        font-size: ' . $fontSizeNome . ';
+                        font-weight: bold;
+                        text-transform: uppercase;
+                    }
+
+                    /* Estilo da Data (Solicitado: Arial, Tamanho 7) */
+                    .campo-data {
+                        position: absolute;
+                        top: 55mm; /* AJUSTE AQUI para descer ou subir a data */
+                        right: 40mm;
+                        width: 100%;
+                        text-align: right; /* Se a data for no canto, mude para right e use padding-right */
+                        font-family: Arial, sans-serif;
+                        font-size: 10pt;
+                    /* font-weight: bold; */
+                        color: #000;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <img src="' . $base64 . '" class="fundo">
+                    <div class="nome-aluno">' . htmlspecialchars($nome) . '</div>
+                    <div class="campo-data">' . htmlspecialchars($data_certificado) . '</div>
+                </div>
+            </body>
+            </html>';
+
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'landscape');
+            $dompdf->render();
+            $dompdf->stream("certificado.pdf", ["Attachment" => false]);
+        }
     }
 }
