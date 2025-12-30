@@ -30,7 +30,7 @@ class CertificadoController extends Controller
             $dompdf = new Dompdf($options);
 
             // Conversão da imagem para Base64
-            $imagemPath = 'modelo.png';
+            $imagemPath = 'images/modelo.png';
             $base64 = '';
             if (file_exists($imagemPath)) {
                 $imgData = file_get_contents($imagemPath);
