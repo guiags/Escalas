@@ -28,7 +28,7 @@ class SoldadoController extends Controller
         }
 
         // Ordena e pagina, mantendo os filtros na URL (withQueryString é crucial)
-        $soldados = $query->orderByRaw('CAST(numero_bone AS INTEGER) ASC')->paginate(152)->withQueryString();
+        $soldados = $query->orderBy('CAST(numero_bone AS INTEGER) ASC')->paginate(152)->withQueryString();
 
         return view('soldados.index', compact('soldados'));
     }
