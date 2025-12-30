@@ -64,15 +64,15 @@
                 </a>
 
                 <a href="{{ route('certificado.index') }}" class="block group">
-                    <div class="h-full p-6 bg-green-50 border-l-4 border-green-600 rounded-lg shadow hover:shadow-lg transition-all duration-200 transform group-hover:-translate-y-1">
+                    <div class="h-full p-6 bg-red-50 border-l-4 border-red-600 rounded-lg shadow hover:shadow-lg transition-all duration-200 transform group-hover:-translate-y-1">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-2xl font-bold text-green-900">Escalas</h3>
+                            <h3 class="text-2xl font-bold text-green-900">Certificados</h3>
                             <span class="text-3xl">🎉</span>
                         </div>
-                        <p class="text-green-800 text-sm">
+                        <p class="text-red-800 text-sm">
                             Gere Certificados para o discente, referente aos cartões de aniversário.
                         </p>
-                        <div class="mt-4 text-green-900 font-semibold group-hover:underline">
+                        <div class="mt-4 text-red-900 font-semibold group-hover:underline">
                             Imprimir Certificado &rarr;
                         </div>
                     </div>
