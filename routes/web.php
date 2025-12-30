@@ -50,11 +50,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-//Route::view('/certificado', 'certificado')->name('certificado.index');
+Route::view('/certificado', 'certificado.certificado')->name('certificado.index');
 
-Route::get('/certificado', function () {
+/*Route::get('/certificado', function () {
     return view('certificado.certificado');
-});
+});*/
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('atividades', AtividadeController::class);
