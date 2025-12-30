@@ -53,7 +53,7 @@ Route::middleware('auth')->group(function () {
 //Route::view('/certificado', 'certificado')->name('certificado.index');
 
 Route::get('/certificado', function () {
-    return view('certificado.gerar_certificado');
+    return view('certificado.gerar_certificado.index');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -63,7 +63,7 @@
                     </div>
                 </a>
 
-                <a href="{{ route('gerar_certificado') }}" class="block group">
+                <a href="{{ route('gerar_certificado.index') }}" class="block group">
                     <div class="h-full p-6 bg-red-50 border-l-4 border-red-600 rounded-lg shadow hover:shadow-lg transition-all duration-200 transform group-hover:-translate-y-1">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-2xl font-bold text-red-900">Certificados</h3>
