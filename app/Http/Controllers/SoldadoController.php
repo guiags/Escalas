@@ -11,15 +11,25 @@ class SoldadoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        // Inicia a query base
+        $query = Soldado::query();
 
-        $soldados = Soldado::all()->map(function($soldado) {
-            $soldado->horas_totais = $soldado->total_horas; 
-            return $soldado;
-        })
-        ->sortBy('numero_bone');
-        
+        // Verifica se existe um termo de busca no request
+        if ($request->filled('search')) {
+            $term = $request->input('search');
+            
+            // Filtra por Nome OU Nome de Guerra
+            $query->where(function($q) use ($term) {
+                $q->where('nome_completo', 'like', "%{$term}%")
+                ->orWhere('nome_guerra', 'like', "%{$term}%");
+            });
+        }
+
+        // Ordena e pagina, mantendo os filtros na URL (withQueryString é crucial)
+        $soldados = $query->orderBy('numero_bone')->paginate(10)->withQueryString();
+
         return view('soldados.index', compact('soldados'));
     }
 

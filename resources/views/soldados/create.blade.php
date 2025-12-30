@@ -33,6 +33,7 @@
                             <div>
                                 <x-input-label for="graduacao" :value="__('Graduação')" />
                                 <select name="graduacao" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                    <option value="Al Sd">Al Soldado</option>
                                     <option value="Sd">Soldado</option>
                                     <option value="Cb">Cabo</option>
                                     <option value="Sgt">Sargento</option>

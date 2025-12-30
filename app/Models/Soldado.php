@@ -21,10 +21,12 @@ class Soldado extends Model
 
     public function horasPorAtividade($atividadeId)
     {
-        return $this->escalas()
+        $horasNoSistema = $this->escalas()
             ->where('atividade_id', $atividadeId)
             ->join('atividades', 'escalas.atividade_id', '=', 'atividades.id')
             ->sum('atividades.carga_horaria');
+
+        return $horasNoSistema + $this->horas_iniciais;
     }
 
     // Retorna o total geral (Histórico do sistema + Carga inicial lançada)

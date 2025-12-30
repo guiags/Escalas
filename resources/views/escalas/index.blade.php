@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-white leading-tight">
                 {{ __('Histórico de Escalas') }}
             </h2>
             <a href="{{ route('escalas.create') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
@@ -25,6 +25,58 @@
                 </div>
             @endif
 
+            <div class="mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                    <form method="GET" action="{{ route('escalas.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                        
+                        <div>
+                            <label for="data" class="block text-sm font-medium text-gray-700 mb-1">
+                                Data da Escala
+                            </label>
+                            <input 
+                                type="date" 
+                                name="data" 
+                                id="data"
+                                value="{{ request('data') }}" 
+                                class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="atividade" class="block text-sm font-medium text-gray-700 mb-1">
+                                Atividade
+                            </label>
+                            <select 
+                                name="atividade" 
+                                id="atividade"
+                                class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            >
+                                <option value="">Todas as Atividades</option>
+                                
+                                @foreach($atividades as $atividade)
+                                    {{-- Note que aqui usamos apenas $atividade, pois é uma string simples --}}
+                                    <option value="{{ $atividade->id }}" {{ request('atividade') == $atividade ? 'selected' : '' }}>
+                                        {{ $atividade->nome }}
+                                    </option>
+                                @endforeach
+                                
+                            </select>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition font-semibold text-xs uppercase tracking-widest">
+                                Filtrar
+                            </button>
+
+                            @if(request('data') || request('atividade'))
+                                <a href="{{ route('escalas.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition font-semibold text-xs uppercase tracking-widest flex items-center justify-center">
+                                    Limpar
+                                </a>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+
+
             <form action="{{ route('escalas.imprimirEmMassa') }}" method="POST" target="_blank" id="form-impressao">
                 @csrf
 
@@ -38,6 +90,8 @@
                         🖨️ Imprimir Selecionados
                     </button>
                 </div>
+
+                
 
                 <div class="bg-white overflow-hidden shadow-sm rounded-b-lg">
                     <div class="p-6 text-gray-900">

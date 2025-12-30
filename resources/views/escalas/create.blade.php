@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-white leading-tight">
             {{ __('Gerar Nova Escala') }}
         </h2>
     </x-slot>
@@ -43,7 +43,7 @@
                                 </select>
                             </div>
 
-                            <div class="md:col-span-2 bg-gray-50 p-5 rounded-lg border border-gray-200 mt-2">
+                            <div class="md:col-span-2 bg-gray-50 p-5 rounded-lg border border-gray-200 ">
                                 <span class="block text-base font-semibold text-gray-800 mb-3">Como deseja gerar esta escala?</span>
                                 
                                 <div class="flex items-start mb-4">
@@ -68,6 +68,14 @@
                             </div>
 
                         </div>
+
+                        
+                            
+                        <div class="grid grid-cols-1 md:grid-cols-1 mt-5">
+                            <x-input-label for="turno" :value="__('Turno')" />
+                            <textarea id="turno" name="turno" rows="4" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" placeholder="Ex: Informações do Turno."></textarea>
+                        </div>
+
 
                         <div class="flex items-center justify-end mt-6">
                             <a href="{{ route('escalas.index') }}" class="text-gray-600 underline mr-4">Cancelar</a>

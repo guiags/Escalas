@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl text-white leading-tight">
             {{ __('Nova Atividade') }}
         </h2>
     </x-slot>
@@ -42,6 +42,12 @@
                                 <x-text-input id="carga_horaria" class="block mt-1 w-full" type="number" name="carga_horaria" :value="old('carga_horaria', 1)" min="0" required />
                                 <p class="text-sm text-gray-500 mt-1">Este valor será somado ao banco de horas do militar.</p>
                                 <x-input-error :messages="$errors->get('carga_horaria')" class="mt-2" />
+                            </div>
+
+                            <div class="md:col-span-2 mt-4">
+                                <x-input-label for="observacao" :value="__('Observações Padrão (Instruções do Serviço)')" />
+                                <textarea id="observacao" name="observacao" rows="4" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" placeholder="Ex: O militar deve apresentar-se com 15 min de antecedência. Uniforme 4º A.">{{ old('observacao') }}</textarea>
+                                <x-input-error :messages="$errors->get('observacao')" class="mt-2" />
                             </div>
 
                         </div>

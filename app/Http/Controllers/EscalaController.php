@@ -11,10 +11,34 @@ use Illuminate\Support\Facades\DB;
 class EscalaController extends Controller
 {
     // Lista o histórico de escalas
-    public function index()
+    public function index(Request $request)
     {
-        $escalas = Escala::with('atividade')->orderBy('data', 'desc')->get();
-        return view('escalas.index', compact('escalas'));
+        // --- LÓGICA DE FILTRO (Mantém o que já fizemos) ---
+        $query = Escala::query();
+
+        if ($request->filled('data')) {
+            // Ajuste 'data_inicio' se o nome da sua coluna no banco for apenas 'data'
+            $query->whereDate('data', $request->input('data'));
+        }
+
+        if ($request->filled('atividade')) {
+            // Usa 'where' exato pois vem de um dropdown/select
+            $query->where('atividade_id', $request->input('atividade'));
+        }
+        
+        $escalas = $query->orderBy('data', 'desc')->paginate(10)->withQueryString();
+        
+        // --- CORREÇÃO AQUI: Carregar as atividades para o Dropdown ---
+        
+        // Opção A: Se "atividade" for apenas um campo de texto na tabela 'escalas'
+        // Isso pega todos os nomes de atividades únicos que já foram cadastrados
+        $atividades = Atividade::all();
+
+        // Opção B: Se você tem uma tabela/Model separado chamado 'Atividade'
+        // $atividades = \App\Models\Atividade::orderBy('nome')->pluck('nome');
+
+        // Passa a variável $atividades junto com $escalas
+        return view('escalas.index', compact('escalas', 'atividades'));
     }
 
     // Formulário para gerar nova escala
@@ -34,6 +58,7 @@ class EscalaController extends Controller
         ]);
 
         $data = $request->input('data');
+        $turno = $request->input('turno');
         $atividade = Atividade::findOrFail($request->input('atividade_id'));
         
         // Verifica duplicidade
@@ -46,6 +71,7 @@ class EscalaController extends Controller
             'data' => $data,
             'atividade_id' => $atividade->id,
             'observacao' => $request->input('modo_geracao') == 'manual' ? 'Escala criada manualmente.' : 'Gerada automaticamente.',
+            'turno' => $turno,
         ]);
 
         // SE FOR MODO MANUAL (Xerife, Claviculário, etc)

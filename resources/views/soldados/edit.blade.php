@@ -34,7 +34,7 @@
                             <div>
                                 <x-input-label for="graduacao" :value="__('Graduação')" />
                                 <select name="graduacao" class="block mt-1 w-full rounded-md shadow-sm">
-                                    @foreach(['Sd', 'Cb', 'Sgt', 'Ten'] as $grad)
+                                    @foreach(['Al Sd', 'Sd', 'Cb', 'Sgt', 'Ten'] as $grad)
                                         <option value="{{ $grad }}" {{ old('graduacao', $soldado->graduacao) == $grad ? 'selected' : '' }}>
                                             {{ $grad }}
                                         </option>

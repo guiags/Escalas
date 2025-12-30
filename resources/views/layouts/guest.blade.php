@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
+
+        <link rel="icon" href="{{ asset('images/Logo231.png') }}" type="image/png">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>{{ config('app.name', 'SysEsc') }}</title>
+
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -19,7 +22,7 @@
                 <div class="p-14 flex flex-col bg-caqui sm:justify-center sm:pt-0 items-center rounded-lg">
                     <div> 
                         <a href="/" >
-                            <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                            <x-application-logo class=" w-32 h-32 fill-current text-gray-500" />
                         </a>
                     </div>
 

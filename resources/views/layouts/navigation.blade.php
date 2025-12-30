@@ -6,7 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex mt-5 items-center">
                     <a href="{{ route('menu') }}">
-                        <x-application-logo class="block h-9 w-auto text-gray-800 dark:text-gray-200" />
+                        <x-application-logo class="block h-20 w-auto text-gray-800 dark:text-gray-200" />
                     </a>
                 </div>
 

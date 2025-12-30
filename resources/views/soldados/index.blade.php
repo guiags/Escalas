@@ -22,6 +22,30 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto">
+                        <div class="mb-4">
+                            <form method="GET" action="{{ route('soldados.index') }}" class="flex items-center gap-2">
+                                <input 
+                                    type="text" 
+                                    name="search" 
+                                    value="{{ request('search') }}" 
+                                    placeholder="Buscar por Nome ou Nome de Guerra..." 
+                                    class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full md:w-1/3"
+                                >
+                                
+                                <button type="submit" class="px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                                    Filtrar
+                                </button>
+
+                                @if(request('search'))
+                                    <a href="{{ route('soldados.index') }}" class="px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300">
+                                        Limpar
+                                    </a>
+                                @endif
+                            </form>
+                        </div>
+
+                        
+
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
