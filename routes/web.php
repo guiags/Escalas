@@ -6,7 +6,7 @@ use App\Http\Controllers\SoldadoController;
 use App\Http\Controllers\EscalaController;
 use App\Http\Controllers\AtividadeController;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\CertificadoController;
 
 
 // Rota padrão do Menu/Dashboard (já criada pelo Breeze)
@@ -66,5 +66,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 });
 
+Route::post('/gerar-pdf-certificado', [CertificadoController::class, 'gerar'])->name('certificado.pdf');
 
 require __DIR__.'/auth.php';
