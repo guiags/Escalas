@@ -11,7 +11,7 @@
     </style>
 </head>
 <body>
-    <form action="certificado.pdf" method="POST">
+    <form action="{{ route('certificado.pdf') }}" method="POST">
         @csrf
         <input type="text" name="nome" placeholder="Nome do Aluno" required>
         <input type="text" name="data" placeholder="Data Divinópolis-MG, 24 de Dezembro de 2025" required>
