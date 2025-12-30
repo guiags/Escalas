@@ -50,6 +50,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::view('/certificado', 'certificado')->name('certificado.index');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('atividades', AtividadeController::class);
     // Rotas para Gerenciamento Manual da Escala
