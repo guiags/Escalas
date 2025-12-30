@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-require 'vendor/autoload.php';
+//require 'vendor/autoload.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
