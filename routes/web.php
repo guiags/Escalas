@@ -19,7 +19,7 @@ Route::resource('soldados', SoldadoController::class)
     ->middleware(['auth', 'verified']);
 
 // Rotas de recurso para Escalas (Inclui criação, visualização, edição...)
-Route::resource('escalas', EscalaController::class)
+Route::resource('escalas', EscalaController::class)->except(['edit'])
     ->middleware(['auth', 'verified']);
 
 // Rotas customizadas para atribuição de soldados
