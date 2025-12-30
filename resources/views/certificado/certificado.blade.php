@@ -11,7 +11,8 @@
     </style>
 </head>
 <body>
-    <form action="/gerar_pdf.php" method="POST">
+    <form action="certificado.pdf" method="POST">
+        @csrf
         <input type="text" name="nome" placeholder="Nome do Aluno" required>
         <input type="text" name="data" placeholder="Data Divinópolis-MG, 24 de Dezembro de 2025" required>
         <button type="submit">Gerar PDF</button>
