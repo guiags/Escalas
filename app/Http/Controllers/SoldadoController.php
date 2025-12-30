@@ -28,7 +28,7 @@ class SoldadoController extends Controller
         }
 
         // Ordena e pagina, mantendo os filtros na URL (withQueryString é crucial)
-        $soldados = $query->orderBy('turma','numero_bone')->paginate(152)->withQueryString();
+        $soldados = $query->orderBy('turma')->orderBy('numero_bone')->paginate(152)->withQueryString();
 
         return view('soldados.index', compact('soldados'));
     }
