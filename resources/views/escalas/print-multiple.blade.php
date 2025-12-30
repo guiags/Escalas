@@ -85,7 +85,7 @@
         /* TELA */
         @media screen {
             .fixed-header, .fixed-footer { display: none; }
-            .screen-header { display: block; margin-bottom: 20px; }
+            .screen-header { display: block; margin-bottom: 0px; }
             .screen-footer { display: block; margin-top: 50px; }
             body { padding: 20px; background: #f3f4f6; }
             .report-container { background: white; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin: 0 auto; max-width: 210mm; }
