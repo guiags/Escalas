@@ -82,7 +82,7 @@ class CertificadoController extends Controller
 
             $dompdf->loadHtml($html);
             $dompdf->setPaper('A4', 'landscape');
-            //$dompdf->render();
+            $dompdf->render();
             $dompdf->stream("certificado.pdf", ["Attachment" => false]);
         }
     }
