@@ -18,6 +18,10 @@ Route::view('/menu', 'menu')
 Route::resource('soldados', SoldadoController::class)
     ->middleware(['auth', 'verified']);
 
+Route::get('/escalas/automacao', [EscalaController::class, 'createAutomacao'])->name('escalas.automacao');
+Route::post('/escalas/automacao', [EscalaController::class, 'storeAutomacao'])->name('escalas.storeAutomacao');
+
+
 // Rotas de recurso para Escalas (Inclui criação, visualização, edição...)
 Route::resource('escalas', EscalaController::class)->except(['edit'])
     ->middleware(['auth', 'verified']);
@@ -63,9 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/escalas/{escala}/adicionar-soldado', [EscalaController::class, 'adicionarSoldado'])->name('escalas.adicionarSoldado');
     Route::delete('/escalas/{escala}/remover-soldado/{soldado}', [EscalaController::class, 'removerSoldado'])->name('escalas.removerSoldado');
     Route::post('/escalas/imprimir-em-massa', [EscalaController::class, 'imprimirEmMassa'])->name('escalas.imprimirEmMassa');
-    Route::get('/escalas/automacao', [EscalaController::class, 'createAutomacao'])->name('escalas.automacao');
-    Route::post('/escalas/automacao', [EscalaController::class, 'storeAutomacao'])->name('escalas.storeAutomacao');
-
+    
 });
 
 Route::post('/gerar-pdf-certificado', [CertificadoController::class, 'gerar'])->name('certificado.pdf');
