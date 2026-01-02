@@ -43,7 +43,7 @@
 
                         <div>
                             <x-input-label for="atividade_id" :value="__('Atividades (Segure Ctrl p/ selecionar várias)')" />
-                            <select id="atividade_id" name="atividade_id[]" multiple class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm h-24">
+                            <select id="atividade_id" name="atividade_id[]" multiple class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-white dark:text-black focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm h-24">
                                 @foreach($atividades as $atividade)
                                     <option value="{{ $atividade->id }}" 
                                         {{ in_array($atividade->id, request('atividade_id', [])) ? 'selected' : '' }}>

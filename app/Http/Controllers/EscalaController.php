@@ -215,7 +215,9 @@ class EscalaController extends Controller
         // Busca todas as escalas selecionadas com seus soldados
         $escalas = Escala::whereIn('id', $ids)
             ->with(['soldados', 'atividade'])
-            ->orderBy('data', 'asc') // Ordena por data
+            ->orderBy('data', 'asc')
+            ->orderBy('turma', 'asc')
+            ->orderBy('atividade_id', 'asc') // Ordena por data
             ->get();
 
         return view('escalas.print-multiple', compact('escalas'));
