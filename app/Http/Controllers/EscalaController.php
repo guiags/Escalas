@@ -236,104 +236,105 @@ class EscalaController extends Controller
         $request->validate([
             'data_inicio' => 'required|date',
             'data_fim' => 'required|date|after_or_equal:data_inicio',
-            'atividade_id' => 'required|exists:atividades,id',
-            'turma' => 'nullable|string', // Se vazio, considera Geral
-            'bone_inicial' => 'required|integer', // O nº do boné do Xerife do primeiro dia
+            'turma' => 'nullable|string',
+            
+            // Validações para as duas escalas
+            'atividade_xerife_id' => 'required|exists:atividades,id',
+            'bone_xerife' => 'required|integer',
+            
+            'atividade_sub_id' => 'required|exists:atividades,id',
+            'bone_sub' => 'required|integer',
         ]);
 
         $startDate = Carbon::parse($request->data_inicio);
         $endDate = Carbon::parse($request->data_fim);
-        $atividadeId = $request->atividade_id;
         $turma = $request->turma;
-        $boneInicial = $request->bone_inicial;
 
-        // 1. Buscar Soldados da Turma (ou Geral) ordenados por boné
+        // --- 1. Buscar Soldados da Turma ---
         $query = Soldado::query();
         if ($turma) {
             $query->where('turma', $turma);
         }
         $soldados = $query->orderBy('numero_bone')->get();
+        $totalSoldados = $soldados->count();
 
         if ($soldados->isEmpty()) {
-            return back()->withErrors(['msg' => 'Nenhum soldado encontrado para esta turma.']);
+            return back()->withErrors(['msg' => 'Nenhum soldado encontrado.']);
         }
 
-        // 2. Encontrar o índice do soldado inicial
-        $startIndex = $soldados->search(function ($soldado) use ($boneInicial) {
-            return $soldado->numero_bone == $boneInicial;
+        // --- 2. Encontrar índices iniciais ---
+        // Índice do Xerife
+        $indexXerife = $soldados->search(function ($s) use ($request) {
+            return $s->numero_bone == $request->bone_xerife;
+        });
+        
+        // Índice do Subxerife
+        $indexSub = $soldados->search(function ($s) use ($request) {
+            return $s->numero_bone == $request->bone_sub;
         });
 
-        if ($startIndex === false) {
-            return back()->withErrors(['msg' => "Soldado com boné nº $boneInicial não encontrado na turma selecionada."]);
+        if ($indexXerife === false) {
+            return back()->withErrors(['msg' => "Soldado Xerife (Boné {$request->bone_xerife}) não encontrado."]);
+        }
+        if ($indexSub === false) {
+            return back()->withErrors(['msg' => "Soldado Subxerife (Boné {$request->bone_sub}) não encontrado."]);
         }
 
-        $totalSoldados = $soldados->count();
         $currentDate = $startDate->copy();
         $createdCount = 0;
-        
-        // Iterador para controlar o avanço na lista de soldados (0 = Xerife dia 1, 1 = Xerife dia 2...)
-        // No dia 1: Indice X é Xerife, X+1 é Sub.
-        // No dia 2: Indice X+1 é Xerife, X+2 é Sub.
-        $offset = 0; 
+        $offset = 0; // Controla o avanço dos dias
 
         DB::beginTransaction();
         try {
             while ($currentDate->lte($endDate)) {
-                // Definir índices circulares
-                $indexXerife = ($startIndex + $offset) % $totalSoldados;
-                $indexSub = ($startIndex + $offset + 1) % $totalSoldados;
-
-                $xerife = $soldados[$indexXerife];
-                $sub = $soldados[$indexSub];
-
-                // 3. Verificar Conflitos (se já estão escalados neste dia em QUALQUER atividade)
-                // Nota: O Xerife de hoje será o Sub de amanhã? Se sim, isso gera conflito?
-                // A regra diz "não pode reescalar soldados já escalados nas DEMAIS escalas".
-                // Assumimos que a verificação é contra outras escalas já salvas no banco para este dia.
                 
-                $conflitoXerife = DB::table('escala_soldado')
+                // Determinar quem são os soldados do dia atual
+                // O operador % (módulo) faz a lista "dar a volta" (loop) quando chega no fim
+                $idxAtualXerife = ($indexXerife + $offset) % $totalSoldados;
+                $idxAtualSub = ($indexSub + $offset) % $totalSoldados;
+
+                $soldadoXerife = $soldados[$idxAtualXerife];
+                $soldadoSub = $soldados[$idxAtualSub];
+
+                // --- 3. Verificar Conflitos ---
+                // Verifica se já estão escalados neste dia (ignora se for a mesma escala que estamos criando agora, mas bloqueia duplicidade)
+                $conflitos = DB::table('escala_soldado')
                     ->join('escalas', 'escala_soldado.escala_id', '=', 'escalas.id')
                     ->where('escalas.data', $currentDate->format('Y-m-d'))
-                    ->where('escala_soldado.soldado_id', $xerife->id)
-                    ->exists();
+                    ->whereIn('escala_soldado.soldado_id', [$soldadoXerife->id, $soldadoSub->id])
+                    ->count();
 
-                $conflitoSub = DB::table('escala_soldado')
-                    ->join('escalas', 'escala_soldado.escala_id', '=', 'escalas.id')
-                    ->where('escalas.data', $currentDate->format('Y-m-d'))
-                    ->where('escala_soldado.soldado_id', $sub->id)
-                    ->exists();
-
-                if ($conflitoXerife || $conflitoSub) {
-                    // Opcional: Pular o dia ou falhar? 
-                    // Como é uma sequência rígida, vamos lançar erro para o usuário corrigir manualmente ou mudar a data.
-                    throw new \Exception("Conflito de escala no dia " . $currentDate->format('d/m/Y') . ": " . 
-                        ($conflitoXerife ? "Soldado {$xerife->numero_bone} já escalado." : "Soldado {$sub->numero_bone} já escalado."));
+                if ($conflitos > 0) {
+                    throw new \Exception("Conflito no dia " . $currentDate->format('d/m/Y') . ": Um dos soldados já está escalado.");
                 }
 
-                // 4. Criar a Escala
-                $escala = Escala::create([
+                // --- 4. Criar Escala do XERIFE ---
+                $escalaXerife = Escala::create([
                     'data' => $currentDate->format('Y-m-d'),
-                    'atividade_id' => $atividadeId,
-                    // 'turma' => $turma // Se a tabela escalas tiver coluna turma, descomente
+                    'atividade_id' => $request->atividade_xerife_id,
                 ]);
-
-                // 5. Vincular Soldados
-                // Assumindo que a tabela pivot não tem coluna de 'função', a ordem de inserção ou lógica define quem é quem.
-                // Se houver coluna 'funcao' na pivot, adicione ['funcao' => 'Xerife'] etc.
-                $escala->soldados()->attach($xerife->id);
-                $escala->soldados()->attach($sub->id);
-
-                $currentDate->addDay();
-                $offset++; // No próximo dia, o Xerife será o próximo da lista (que era o Sub hoje)
+                $escalaXerife->soldados()->attach($soldadoXerife->id);
                 $createdCount++;
+
+                // --- 5. Criar Escala do SUBXERIFE ---
+                $escalaSub = Escala::create([
+                    'data' => $currentDate->format('Y-m-d'),
+                    'atividade_id' => $request->atividade_sub_id,
+                ]);
+                $escalaSub->soldados()->attach($soldadoSub->id);
+                $createdCount++;
+
+                // Avança para o próximo dia e próximo soldado na fila
+                $currentDate->addDay();
+                $offset++;
             }
             
             DB::commit();
-            return redirect()->route('escalas.index')->with('success', "$createdCount escalas geradas com sucesso!");
+            return redirect()->route('escalas.index')->with('success', "Automação concluída! $createdCount registros de escala criados.");
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['msg' => 'Erro ao gerar escalas: ' . $e->getMessage()]);
+            return back()->withErrors(['msg' => 'Erro: ' . $e->getMessage()]);
         }
     }
 
