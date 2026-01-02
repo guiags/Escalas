@@ -14,31 +14,30 @@ class EscalaController extends Controller
     // Lista o histórico de escalas
     public function index(Request $request)
     {
-        // --- LÓGICA DE FILTRO (Mantém o que já fizemos) ---
-        $query = Escala::query();
+        $query = Escala::with(['atividade', 'soldados']);
 
-        if ($request->filled('data')) {
-            // Ajuste 'data_inicio' se o nome da sua coluna no banco for apenas 'data'
-            $query->whereDate('data', $request->input('data'));
+        // Filtro por Intervalo de Datas
+        if ($request->filled('data_inicio')) {
+            $query->where('data', '>=', $request->data_inicio);
+        }
+        if ($request->filled('data_fim')) {
+            $query->where('data', '<=', $request->data_fim);
         }
 
-        if ($request->filled('atividade')) {
-            // Usa 'where' exato pois vem de um dropdown/select
-            $query->where('atividade_id', $request->input('atividade'));
+        // Filtro por Múltiplas Atividades
+        if ($request->filled('atividade_id')) {
+            // Se vier do formulário, será um array. O whereIn aceita arrays.
+            $query->whereIn('atividade_id', $request->atividade_id);
         }
+
+        // Ordenação e Paginação
+        $escalas = $query->orderBy('data', 'desc')->paginate(80);
         
-        $escalas = $query->orderBy('data', 'desc')->paginate(10)->withQueryString();
-        
-        // --- CORREÇÃO AQUI: Carregar as atividades para o Dropdown ---
-        
-        // Opção A: Se "atividade" for apenas um campo de texto na tabela 'escalas'
-        // Isso pega todos os nomes de atividades únicos que já foram cadastrados
+        // Mantém os filtros na paginação (para não perder o filtro ao mudar de página)
+        $escalas->appends($request->all());
+
         $atividades = Atividade::all();
 
-        // Opção B: Se você tem uma tabela/Model separado chamado 'Atividade'
-        // $atividades = \App\Models\Atividade::orderBy('nome')->pluck('nome');
-
-        // Passa a variável $atividades junto com $escalas
         return view('escalas.index', compact('escalas', 'atividades'));
     }
 

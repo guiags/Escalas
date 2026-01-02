@@ -29,52 +29,38 @@
             @endif
 
             <div class="mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                    <form method="GET" action="{{ route('escalas.index') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                        
+                    <form method="GET" action="{{ route('escalas.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        
                         <div>
-                            <label for="data" class="block text-sm font-medium text-gray-700 mb-1">
-                                Data da Escala
-                            </label>
-                            <input 
-                                type="date" 
-                                name="data" 
-                                id="data"
-                                value="{{ request('data') }}" 
-                                class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                            >
+                            <x-input-label for="data_inicio" :value="__('Data Inicial')" />
+                            <x-text-input id="data_inicio" class="block mt-1 w-full" type="date" name="data_inicio" :value="request('data_inicio')" />
                         </div>
 
                         <div>
-                            <label for="atividade" class="block text-sm font-medium text-gray-700 mb-1">
-                                Atividade
-                            </label>
-                            <select 
-                                name="atividade" 
-                                id="atividade"
-                                class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                            >
-                                <option value="">Todas as Atividades</option>
-                                
+                            <x-input-label for="data_fim" :value="__('Data Final')" />
+                            <x-text-input id="data_fim" class="block mt-1 w-full" type="date" name="data_fim" :value="request('data_fim')" />
+                        </div>
+
+                        <div>
+                            <x-input-label for="atividade_id" :value="__('Atividades (Segure Ctrl p/ selecionar várias)')" />
+                            <select id="atividade_id" name="atividade_id[]" multiple class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm h-24">
                                 @foreach($atividades as $atividade)
-                                    {{-- Note que aqui usamos apenas $atividade, pois é uma string simples --}}
-                                    <option value="{{ $atividade->id }}" {{ request('atividade') == $atividade ? 'selected' : '' }}>
+                                    <option value="{{ $atividade->id }}" 
+                                        {{ in_array($atividade->id, request('atividade_id', [])) ? 'selected' : '' }}>
                                         {{ $atividade->nome }}
                                     </option>
                                 @endforeach
-                                
                             </select>
                         </div>
 
-                        <div class="flex gap-2">
-                            <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition font-semibold text-xs uppercase tracking-widest">
-                                Filtrar
-                            </button>
-
-                            @if(request('data') || request('atividade'))
-                                <a href="{{ route('escalas.index') }}" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition font-semibold text-xs uppercase tracking-widest flex items-center justify-center">
-                                    Limpar
-                                </a>
-                            @endif
+                        <div class="flex gap-2 pb-1">
+                            <x-primary-button type="submit" class="h-10">
+                                {{ __('Filtrar') }}
+                            </x-primary-button>
+                            
+                            <a href="{{ route('escalas.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-500 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:bg-gray-700 active:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150 h-10">
+                                Limpar
+                            </a>
                         </div>
                     </form>
                 </div>
