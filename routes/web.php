@@ -67,5 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::post('/gerar-pdf-certificado', [CertificadoController::class, 'gerar'])->name('certificado.pdf');
+Route::get('/escalas/automacao', [EscalaController::class, 'createAutomacao'])->name('escalas.automacao');
+Route::post('/escalas/automacao', [EscalaController::class, 'storeAutomacao'])->name('escalas.storeAutomacao');
 
 require __DIR__.'/auth.php';
