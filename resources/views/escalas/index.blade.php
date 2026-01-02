@@ -8,7 +8,7 @@
                 + Nova Escala
             </a>
             <a href="{{ route('escalas.automacao') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Gerar Escala Semanal Automática
+                Escala Semanal
             </a>
         </div>
     </x-slot>

@@ -33,7 +33,7 @@
 
                             <div>
                                 <x-input-label for="atividade_id" :value="__('Tipo de Escala (Atividade)')" />
-                                <select id="atividade_id" name="atividade_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
+                                <select id="atividade_id" name="atividade_id" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-white dark:text-black focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm">
                                     @foreach($atividades as $atividade)
                                         <option value="{{ $atividade->id }}">{{ $atividade->nome }}</option>
                                     @endforeach
@@ -42,7 +42,7 @@
 
                             <div>
                                 <x-input-label for="turma" :value="__('Turma (Deixe em branco para Geral)')" />
-                                <input list="turmas-list" id="turma" name="turma" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Ex: 1 Pelotão ou deixe vazio">
+                                <input list="turmas-list" id="turma" name="turma" class="block mt-1 w-full border-gray-300 dark:border-gray-700 dark:bg-white dark:text-black focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm" placeholder="Ex: 1 Pelotão ou deixe vazio">
                                 <datalist id="turmas-list">
                                     @foreach($turmas as $t)
                                         <option value="{{ $t }}">
