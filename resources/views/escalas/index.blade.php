@@ -44,7 +44,7 @@
                             <x-text-input id="data_fim" class="block mt-1 w-full" type="date" name="data_fim" :value="request('data_fim')" />
                         </div>
 
-                        <<div>
+                        <div>
     <x-input-label for="atividade_id" :value="__('Atividades (Selecione múltiplas)')" />
 
         <div x-data="dropdownAtividades(@json(request('atividade_id', [])))" class="relative mt-1">
@@ -89,8 +89,9 @@
             <template x-for="id in selected" :key="id">
                 <input type="hidden" name="atividade_id[]" :value="id">
             </template>
-            </div>
         </div>
+    </div>
+                </div>
 
                         <div class="flex gap-2 pb-1">
                             <x-primary-button type="submit" class="h-10">
@@ -173,5 +174,37 @@
             const checkboxes = document.querySelectorAll('.escala-checkbox');
             checkboxes.forEach(cb => cb.checked = this.checked);
         });
+
+
+        document.addEventListener('alpine:init', () => {
+        Alpine.data('dropdownAtividades', (initialSelected) => ({
+            open: false,
+            selected: initialSelected,
+
+            toggleOpen() {
+                this.open = !this.open;
+            },
+
+            toggleItem(id) {
+                if (this.selected.includes(id)) {
+                    // Remove se já existe
+                    this.selected = this.selected.filter(item => item != id);
+                } else {
+                    // Adiciona se não existe
+                    this.selected.push(id);
+                }
+            },
+
+            isSelected(id) {
+                return this.selected.includes(id);
+            },
+
+            get displayText() {
+                if (this.selected.length === 0) return 'Selecione...';
+                if (this.selected.length === 1) return this.selected.length + ' atividade selecionada';
+                return this.selected.length + ' atividades selecionadas';
+            }
+        }));
+    });
     </script>
 </x-app-layout>
