@@ -44,73 +44,53 @@
                             <x-text-input id="data_fim" class="block mt-1 w-full" type="date" name="data_fim" :value="request('data_fim')" />
                         </div>
 
-                        <div>
-                            <x-input-label for="atividade_id" :value="__('Atividades (Selecione múltiplas)')" />
+                        <<div>
+    <x-input-label for="atividade_id" :value="__('Atividades (Selecione múltiplas)')" />
 
-                            <div x-data="{ 
-                                    open: false,
-                                    selected: @json(request('atividade_id', [])), // Pega valores antigos ou array vazio
-                                    
-                                    // Texto que aparece no botão fechado
-                                    get displayText() {
-                                        if (this.selected.length === 0) return 'Selecione...';
-                                        if (this.selected.length === 1) return this.selected.length + ' atividade selecionada';
-                                        return this.selected.length + ' atividades selecionadas';
-                                    },
+        <div x-data="dropdownAtividades(@json(request('atividade_id', [])))" class="relative mt-1">
 
-                                    toggle(id) {
-                                        if (this.selected.includes(id)) {
-                                            this.selected = this.selected.filter(item => item != id);
-                                        } else {
-                                            this.selected.push(id);
-                                        }
-                                    }
-                                }" 
-                                class="relative mt-1">
+            <button type="button" 
+                    @click="toggleOpen()" 
+                    @click.outside="open = false"
+                    class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 h-10">
+                
+                <span class="block truncate" x-text="displayText"></span>
+                
+                <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                    <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clip-rule="evenodd" />
+                    </svg>
+                </span>
+            </button>
 
-                                <button type="button" 
-                                        @click="open = !open" 
-                                        @click.outside="open = false"
-                                        class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 h-10">
-                                    
-                                    <span class="block truncate" x-text="displayText"></span>
-                                    
-                                    <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                                        <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fill-rule="evenodd" d="M10 3a.75.75 0 01.55.24l3.25 3.5a.75.75 0 11-1.1 1.02L10 4.852 7.3 7.76a.75.75 0 01-1.1-1.02l3.25-3.5A.75.75 0 0110 3zm-3.76 9.2a.75.75 0 011.06.04l2.7 2.908 2.7-2.908a.75.75 0 111.1 1.02l-3.25 3.5a.75.75 0 01-1.1 0l-3.25-3.5a.75.75 0 01.04-1.06z" clip-rule="evenodd" />
-                                        </svg>
-                                    </span>
-                                </button>
+            <div x-show="open" 
+                x-transition
+                style="display: none;"
+                class="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dark:bg-gray-800">
 
-                                <div x-show="open" 
-                                    x-transition:leave="transition ease-in duration-100"
-                                    x-transition:leave-start="opacity-100"
-                                    x-transition:leave-end="opacity-0"
-                                    class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dark:bg-gray-800"
-                                    style="display: none;"> @foreach($atividades as $atividade)
-                                        <div @click="toggle({{ $atividade->id }})" 
-                                            class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-gray-200">
-                                            
-                                            <div class="flex items-center">
-                                                <input type="checkbox" 
-                                                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 mr-3"
-                                                    :checked="selected.includes({{ $atividade->id }})">
-                                                
-                                                <span class="block truncate font-normal"
-                                                    :class="{ 'font-semibold': selected.includes({{ $atividade->id }}) }">
-                                                    {{ $atividade->nome }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    @endforeach
-                                </div>
-
-                                <template x-for="id in selected" :key="id">
-                                    <input type="hidden" name="atividade_id[]" :value="id">
-                                </template>
-                                
-                            </div>
+                @foreach($atividades as $atividade)
+                    <div @click="toggleItem({{ $atividade->id }})" 
+                        class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 dark:text-gray-200">
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" 
+                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600 mr-3 pointer-events-none"
+                                :checked="isSelected({{ $atividade->id }})">
+                            
+                            <span class="block truncate"
+                                :class="{ 'font-semibold': isSelected({{ $atividade->id }}) }">
+                                {{ $atividade->nome }}
+                            </span>
                         </div>
+                    </div>
+                @endforeach
+            </div>
+
+            <template x-for="id in selected" :key="id">
+                <input type="hidden" name="atividade_id[]" :value="id">
+            </template>
+            </div>
+        </div>
 
                         <div class="flex gap-2 pb-1">
                             <x-primary-button type="submit" class="h-10">
