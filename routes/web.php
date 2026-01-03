@@ -67,6 +67,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/escalas/{escala}/adicionar-soldado', [EscalaController::class, 'adicionarSoldado'])->name('escalas.adicionarSoldado');
     Route::delete('/escalas/{escala}/remover-soldado/{soldado}', [EscalaController::class, 'removerSoldado'])->name('escalas.removerSoldado');
     Route::post('/escalas/imprimir-em-massa', [EscalaController::class, 'imprimirEmMassa'])->name('escalas.imprimirEmMassa');
+    Route::get('/escalas/imprimir-multiplas', [EscalaController::class, 'printMultiple'])->name('escalas.printMultiple');
+    
     
 });
 

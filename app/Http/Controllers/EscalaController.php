@@ -88,6 +88,10 @@ class EscalaController extends Controller
         // 3. ORDENAÇÃO: 
         //      Pri: Menos horas NESTA atividade específica.
         //      Sec: Menos horas TOTAIS (Geral + Inicial) para desempate.
+
+        $dataEscala = \Carbon\Carbon::parse($data);
+        $seteDiasAtras = $dataEscala->copy()->subDays(7)->format('Y-m-d');
+        $ontem = $dataEscala->copy()->subDay()->format('Y-m-d');
         
         $candidatos = Soldado::where('disponivel', true)
             ->when($atividade->sexo_restrito, function($q) use ($atividade) {
@@ -95,6 +99,12 @@ class EscalaController extends Controller
             })
             ->whereDoesntHave('escalas', function ($q) use ($data) {
                 $q->where('data', $data);
+            })
+            ->when($atividade->horas > 0, function($query) use ($seteDiasAtras, $ontem) {
+                return $query->whereDoesntHave('escalas', function ($q) use ($seteDiasAtras, $ontem) {
+                    // Exclui quem trabalhou entre (Data-7) e (Data-1)
+                    $q->whereBetween('data', [$seteDiasAtras, $ontem]);
+                });
             })
             ->get()
             ->sortBy([

@@ -4,12 +4,15 @@
             <h2 class="font-semibold text-xl text-white leading-tight">
                 {{ __('Histórico de Escalas') }}
             </h2>
-            <a href="{{ route('escalas.create') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                + Nova Escala
-            </a>
-            <a href="{{ route('escalas.automacao') }}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Escala Semanal
-            </a>
+
+            <div class="flex gap-4">
+                <a href="{{ route('escalas.create') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                    + Nova Escala
+                </a>
+                <a href="{{ route('escalas.automacao') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                    Escala Semanal
+                </a>
+            </div>
         </div>
     </x-slot>
 
