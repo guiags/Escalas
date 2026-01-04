@@ -165,6 +165,7 @@ class EscalaController extends Controller
         // Opcional: Filtra pelo sexo da atividade para evitar erros
         $query = Soldado::whereDoesntHave('escalas', function($q) use ($escala) {
             $q->where('escala_soldado.escala_id', $escala->id);
+            $q->where('data', $escala->data);
         })->where('disponivel', true);
 
         if ($escala->atividade->sexo_restrito) {
