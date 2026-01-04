@@ -26,7 +26,7 @@
                                     Escala de Serviço
                                 </span>
                                 <span class="block text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                                    Batalhão de Comando e Serviços
+                                    231ª CIA ET
                                 </span>
                             </div>
                         </a>
