@@ -106,7 +106,7 @@ class EscalaController extends Controller
         }
 
         // Lista única de IDs proibidos
-        $idsBloqueados = $bloqueadosIntersticio->unique()->toArray();
+        $idsBloqueados = $bloqueadosHoje->merge($bloqueadosIntersticio)->unique()->toArray();
 
         // 2. Busca Candidatos
         // Usamos withCount para contar quantas vezes ele já fez ESSA atividade específica
