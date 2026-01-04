@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Escala Individual - {{ $soldado->nome_guerra }}</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
+<x-app-layout>
 <body class="font-sans antialiased text-gray-900 bg-gray-100 dark:bg-gray-900 dark:text-gray-100">
     
     <div class="min-h-screen flex flex-col items-center pt-6 sm:pt-10">
@@ -108,4 +101,4 @@
         </div>
     </div>
 </body>
-</html>
+</x-app-layout>
