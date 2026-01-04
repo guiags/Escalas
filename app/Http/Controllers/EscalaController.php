@@ -163,10 +163,18 @@ class EscalaController extends Controller
 
         // Carrega soldados disponíveis para adicionar (que NÃO estão nesta escala)
         // Opcional: Filtra pelo sexo da atividade para evitar erros
-        $query = Soldado::whereDoesntHave('escalas', function($q) use ($escala) {
+        /*$query = Soldado::whereDoesntHave('escalas', function($q) use ($escala) {
             $q->where('escala_soldado.escala_id', $escala->id);
             $q->where('data', $escala->data);
-        })->where('disponivel', true);
+        })->where('disponivel', true);*/
+
+        $query = Soldado::where('disponivel', true)
+        ->whereDoesntHave('escalas', function($q) use ($escala) {
+            // AQUI ESTÁ A MUDANÇA:
+            // Antes verificava o ID (só excluía quem estava nesta escala específica).
+            // Agora verifica a DATA (exclui quem está nesta OU em qualquer outra escala nesse dia).
+            $q->where('data', $escala->data);
+        });
 
         if ($escala->atividade->sexo_restrito) {
             $query->where('sexo', $escala->atividade->sexo_restrito);
