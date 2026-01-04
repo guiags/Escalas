@@ -68,10 +68,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/escalas/{escala}/remover-soldado/{soldado}', [EscalaController::class, 'removerSoldado'])->name('escalas.removerSoldado');
     Route::post('/escalas/imprimir-em-massa', [EscalaController::class, 'imprimirEmMassa'])->name('escalas.imprimirEmMassa');
     Route::get('/escalas/imprimir-multiplas', [EscalaController::class, 'printMultiple'])->name('escalas.printMultiple');
-    Route::get('/minha-escala/{matricula}', [EscalaController::class, 'publicShow'])->name('escala.publica');
     
 });
 
 Route::post('/gerar-pdf-certificado', [CertificadoController::class, 'gerar'])->name('certificado.pdf');
-
+Route::get('/minha-escala/{matricula}', [EscalaController::class, 'publicShow'])->name('escala.publica');
+    
 require __DIR__.'/auth.php';
