@@ -51,7 +51,7 @@ class EscalaController extends Controller
     // O ALGORITMO DE GERAÇÃO AUTOMÁTICA
     public function store(Request $request)
     {
-        // 1. Aumenta o tempo limite para 120 segundos (evita o erro imediato)
+        // 1. Aumenta tempo limite (segurança)
         set_time_limit(120);
 
         $request->validate([
@@ -64,12 +64,10 @@ class EscalaController extends Controller
         $turno = $request->input('turno');
         $atividade = Atividade::findOrFail($request->input('atividade_id'));
 
-        // Verifica duplicidade
         if (Escala::where('data', $data)->where('atividade_id', $atividade->id)->exists()) {
             return back()->withErrors(['erro' => 'Já existe uma escala deste tipo para esta data.']);
         }
 
-        // Cria a Escala
         $escala = Escala::create([
             'data' => $data,
             'atividade_id' => $atividade->id,
@@ -77,25 +75,23 @@ class EscalaController extends Controller
             'turno' => $turno,
         ]);
 
-        // MODO MANUAL: Redireciona
         if ($request->input('modo_geracao') == 'manual') {
             return redirect()->route('escalas.edit', $escala->id)
                 ->with('success', 'Escala criada! Adicione os militares manualmente abaixo.');
         }
 
-        // --- OTIMIZAÇÃO DE PERFORMANCE PARA MODO AUTOMÁTICO ---
+        // --- INÍCIO DA AUTOMAÇÃO ---
 
-        // Passo 1: Descobrir quem JÁ trabalhou hoje (Choque de horário)
-        // Usamos DB::table que é muito mais leve que Eloquent para apenas pegar IDs
+        // 1. Identifica IDs BLOQUEADOS (SQL Puro para rapidez)
+        
+        // A. Quem já trabalha hoje
         $bloqueadosHoje = DB::table('escala_soldado')
             ->join('escalas', 'escala_soldado.escala_id', '=', 'escalas.id')
             ->where('escalas.data', $data)
             ->pluck('escala_soldado.soldado_id');
 
-        // Passo 2: Descobrir quem está no Interstício (Descanso de 7 dias)
-        // Apenas se a atividade tiver horas > 0
+        // B. Quem está no descanso (Se atividade conta horas)
         $bloqueadosIntersticio = collect();
-        
         if ($atividade->horas > 0) {
             $dataEscala = \Carbon\Carbon::parse($data);
             $seteDiasAtras = $dataEscala->copy()->subDays(7)->format('Y-m-d');
@@ -107,30 +103,33 @@ class EscalaController extends Controller
                 ->pluck('escala_soldado.soldado_id');
         }
 
-        // Junta todos os IDs proibidos numa lista única
+        // Lista única de IDs proibidos
         $idsBloqueados = $bloqueadosHoje->merge($bloqueadosIntersticio)->unique()->toArray();
 
-        // Passo 3: Buscar candidatos e Ordenar via BANCO DE DADOS (SQL)
-        // Isso evita o loop do PHP e o problema N+1
+        // 2. Busca Candidatos
+        // Usamos withCount para contar quantas vezes ele já fez ESSA atividade específica
+        // Isso ajuda na ordenação primária
         $candidatos = Soldado::where('disponivel', true)
-            ->whereNotIn('id', $idsBloqueados) // Exclui os bloqueados
+            ->whereNotIn('id', $idsBloqueados)
             ->when($atividade->sexo_restrito, function($q) use ($atividade) {
                 return $q->where('sexo', $atividade->sexo_restrito);
             })
-            // Conta quantas vezes o soldado já fez ESTA atividade específica
             ->withCount(['escalas as qtd_atividade_atual' => function($query) use ($atividade) {
                 $query->where('atividade_id', $atividade->id);
             }])
-            // ORDENAÇÃO VIA SQL (Muito Rápido)
-            // Quem fez menos vezes essa atividade aparece primeiro
-            ->orderBy('qtd_atividade_atual', 'asc')
-            // Critério de desempate: Total Geral (Assumindo que seja uma coluna no banco)
-            // Se 'total_geral' for calculado no PHP, troque orderBy por ->get()->sortBy('total_geral')
-            ->orderBy('total_geral', 'asc') 
-            ->get();
+            ->get(); // <--- Trazemos do banco para a memória aqui
 
+        // 3. Ordenação (Feita na Coleção do Laravel, não no SQL)
+        // Isso permite usar 'total_geral' que é calculado no PHP
+        $candidatos = $candidatos->sortBy([
+            // Critério 1: Menos escalas NESTA atividade (usamos a contagem que veio do SQL)
+            ['qtd_atividade_atual', 'asc'],
+            
+            // Critério 2: Menos horas TOTAIS (usamos o atributo do seu model)
+            fn($a, $b) => $a->total_geral <=> $b->total_geral,
+        ]);
 
-        // Passo 4: Seleção (Mantendo sua lógica de turmas)
+        // 4. Seleção das Turmas
         $selecionados = collect();
         $turmasSelecionadas = [];
         $qtde = $atividade->quantidade_padrao;
@@ -144,7 +143,6 @@ class EscalaController extends Controller
             }
         }
 
-        // Completa com o resto
         if ($selecionados->count() < $qtde) {
             $restantes = $candidatos->diff($selecionados);
             foreach ($restantes as $soldado) {
@@ -155,7 +153,7 @@ class EscalaController extends Controller
 
         if ($selecionados->isEmpty()) {
             $escala->delete();
-            return back()->withErrors(['erro' => 'Não há militares disponíveis (todos escalados, em descanso ou indisponíveis).']);
+            return back()->withErrors(['erro' => 'Não há militares disponíveis (todos escalados ou em descanso).']);
         }
 
         $escala->soldados()->attach($selecionados->pluck('id'));
