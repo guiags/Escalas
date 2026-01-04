@@ -99,7 +99,9 @@ class EscalaController extends Controller
 
             $bloqueadosIntersticio = DB::table('escala_soldado')
                 ->join('escalas', 'escala_soldado.escala_id', '=', 'escalas.id')
+                ->join('atividades', 'escalas.atividade_id', '=', 'atividades.id') // <--- CORREÇÃO CRUCIAL
                 ->whereBetween('escalas.data', [$seteDiasAtras, $ontem])
+                ->where('atividades.horas', '>', 0) // Verifica se a atividade PASSADA contava horas
                 ->pluck('escala_soldado.soldado_id');
         }
 
