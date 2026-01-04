@@ -139,7 +139,7 @@ class EscalaController extends Controller
         foreach ($candidatos as $soldado) {
             if ($selecionados->count() >= $qtde) break;
 
-            if (!in_array($soldado->turma, $turmasSelecionadas) && !in_array($soldado->id, $idsBloqueados)) {
+            if (!in_array($soldado->turma, $turmasSelecionadas) && !in_array($soldado->id, $bloqueadosIntersticio->toArray())) {
                 $selecionados->push($soldado);
                 $turmasSelecionadas[] = $soldado->turma;
             }
@@ -161,7 +161,7 @@ class EscalaController extends Controller
         $escala->soldados()->attach($selecionados->pluck('id'));
 
         return redirect()->route('escalas.show', $escala->id)
-            ->with('success', 'Escala gerada automaticamente com ' . $selecionados->count() . ' militares.');
+            ->with('success', 'Escala gerada automaticamente com ' . $selecionados->count() . ' militares.' . $bloqueadosIntersticio);
     }
 
     // Visualizar detalhes da escala
