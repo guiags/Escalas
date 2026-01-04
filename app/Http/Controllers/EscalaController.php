@@ -396,7 +396,7 @@ class EscalaController extends Controller
         ->with('atividade') // Traz detalhes da atividade (nome, cor, etc)
         ->get()
         ->keyBy(function($item) {
-            return $item->data->format('Y-m-d');
+            return \Carbon\Carbon::parse($item->data)->format('Y-m-d');
         });
 
         // 4. Dados para navegação do calendário
