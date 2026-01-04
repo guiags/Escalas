@@ -95,12 +95,12 @@ class EscalaController extends Controller
         if ($atividade->carga_horaria > 0) {
             $dataEscala = \Carbon\Carbon::parse($data);
             $seteDiasAtras = $dataEscala->copy()->subDays(7)->format('Y-m-d');
-            $ontem = $dataEscala->copy()->subDay()->format('Y-m-d');
+            $seteDiasDepois = $dataEscala->copy()->addDays(7)->format('Y-m-d');;
 
             $bloqueadosIntersticio = DB::table('escala_soldado')
                 ->join('escalas', 'escala_soldado.escala_id', '=', 'escalas.id')
                 ->join('atividades', 'escalas.atividade_id', '=', 'atividades.id') // <--- CORREÇÃO CRUCIAL
-                ->whereBetween('escalas.data', [$seteDiasAtras, '2026-01-11'])
+                ->whereBetween('escalas.data', [$seteDiasAtras, $seteDiasDepois])
                 ->where('atividades.carga_horaria', '>', 0) // Verifica se a atividade PASSADA contava horas
                 ->pluck('escala_soldado.soldado_id');
         }
@@ -371,6 +371,51 @@ class EscalaController extends Controller
             DB::rollBack();
             return back()->withErrors(['msg' => 'Erro: ' . $e->getMessage()]);
         }
+    }
+
+    public function publicShow(Request $request, $matricula)
+    {
+        // 1. Busca o militar pela matrícula
+        $soldado = Soldado::where('matricula', $matricula)->first();
+
+        if (!$soldado) {
+            abort(404, 'Militar não encontrado.');
+        }
+
+        // 2. Define o mês de visualização (Padrão: Atual)
+        $mesAno = $request->input('mes', now()->format('Y-m'));
+        $dataBase = Carbon::createFromFormat('Y-m', $mesAno);
+
+        // 3. Busca as escalas deste soldado neste mês
+        // Precisamos filtrar as escalas onde este soldado está no relacionamento 'soldados'
+        $escalas = Escala::whereHas('soldados', function ($q) use ($soldado) {
+            $q->where('soldados.id', $soldado->id);
+        })
+        ->whereYear('data', $dataBase->year)
+        ->whereMonth('data', $dataBase->month)
+        ->with('atividade') // Traz detalhes da atividade (nome, cor, etc)
+        ->get()
+        ->keyBy(function($item) {
+            return $item->data->format('Y-m-d');
+        });
+
+        // 4. Dados para navegação do calendário
+        $inicioMes = $dataBase->copy()->startOfMonth();
+        $fimMes = $dataBase->copy()->endOfMonth();
+        
+        // Links Ant/Prox
+        $mesAnterior = $dataBase->copy()->subMonth()->format('Y-m');
+        $proximoMes = $dataBase->copy()->addMonth()->format('Y-m');
+
+        return view('escalas.publica', compact(
+            'soldado', 
+            'escalas', 
+            'dataBase', 
+            'inicioMes', 
+            'fimMes',
+            'mesAnterior',
+            'proximoMes'
+        ));
     }
 
 
