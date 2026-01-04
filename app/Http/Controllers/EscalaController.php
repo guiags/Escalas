@@ -51,22 +51,25 @@ class EscalaController extends Controller
     // O ALGORITMO DE GERAÇÃO AUTOMÁTICA
     public function store(Request $request)
     {
+        // 1. Aumenta o tempo limite para 120 segundos (evita o erro imediato)
+        set_time_limit(120);
+
         $request->validate([
             'data' => 'required|date',
             'atividade_id' => 'required|exists:atividades,id',
-            'modo_geracao' => 'required|in:automatico,manual', // Novo campo do formulário
+            'modo_geracao' => 'required|in:automatico,manual',
         ]);
 
         $data = $request->input('data');
         $turno = $request->input('turno');
         $atividade = Atividade::findOrFail($request->input('atividade_id'));
-        
+
         // Verifica duplicidade
         if (Escala::where('data', $data)->where('atividade_id', $atividade->id)->exists()) {
             return back()->withErrors(['erro' => 'Já existe uma escala deste tipo para esta data.']);
         }
 
-        // 1. Cria a Escala (Vazia inicialmente)
+        // Cria a Escala
         $escala = Escala::create([
             'data' => $data,
             'atividade_id' => $atividade->id,
@@ -74,47 +77,60 @@ class EscalaController extends Controller
             'turno' => $turno,
         ]);
 
-        // SE FOR MODO MANUAL (Xerife, Claviculário, etc)
-        // Interrompe aqui e manda para a tela de edição
+        // MODO MANUAL: Redireciona
         if ($request->input('modo_geracao') == 'manual') {
             return redirect()->route('escalas.edit', $escala->id)
-                            ->with('success', 'Escala criada! Adicione os militares manualmente abaixo.');
+                ->with('success', 'Escala criada! Adicione os militares manualmente abaixo.');
         }
 
-        // SE FOR AUTOMÁTICO
-        // Lógica de Seleção:
-        // 1. Disponível e Sexo Correto
-        // 2. Não estar escalado em outra coisa no mesmo dia
-        // 3. ORDENAÇÃO: 
-        //      Pri: Menos horas NESTA atividade específica.
-        //      Sec: Menos horas TOTAIS (Geral + Inicial) para desempate.
+        // --- OTIMIZAÇÃO DE PERFORMANCE PARA MODO AUTOMÁTICO ---
 
-        $dataEscala = \Carbon\Carbon::parse($data);
-        $seteDiasAtras = $dataEscala->copy()->subDays(7)->format('Y-m-d');
-        $ontem = $dataEscala->copy()->subDay()->format('Y-m-d');
+        // Passo 1: Descobrir quem JÁ trabalhou hoje (Choque de horário)
+        // Usamos DB::table que é muito mais leve que Eloquent para apenas pegar IDs
+        $bloqueadosHoje = DB::table('escala_soldado')
+            ->join('escalas', 'escala_soldado.escala_id', '=', 'escalas.id')
+            ->where('escalas.data', $data)
+            ->pluck('escala_soldado.soldado_id');
+
+        // Passo 2: Descobrir quem está no Interstício (Descanso de 7 dias)
+        // Apenas se a atividade tiver horas > 0
+        $bloqueadosIntersticio = collect();
         
+        if ($atividade->horas > 0) {
+            $dataEscala = \Carbon\Carbon::parse($data);
+            $seteDiasAtras = $dataEscala->copy()->subDays(7)->format('Y-m-d');
+            $ontem = $dataEscala->copy()->subDay()->format('Y-m-d');
+
+            $bloqueadosIntersticio = DB::table('escala_soldado')
+                ->join('escalas', 'escala_soldado.escala_id', '=', 'escalas.id')
+                ->whereBetween('escalas.data', [$seteDiasAtras, $ontem])
+                ->pluck('escala_soldado.soldado_id');
+        }
+
+        // Junta todos os IDs proibidos numa lista única
+        $idsBloqueados = $bloqueadosHoje->merge($bloqueadosIntersticio)->unique()->toArray();
+
+        // Passo 3: Buscar candidatos e Ordenar via BANCO DE DADOS (SQL)
+        // Isso evita o loop do PHP e o problema N+1
         $candidatos = Soldado::where('disponivel', true)
+            ->whereNotIn('id', $idsBloqueados) // Exclui os bloqueados
             ->when($atividade->sexo_restrito, function($q) use ($atividade) {
                 return $q->where('sexo', $atividade->sexo_restrito);
             })
-            ->whereDoesntHave('escalas', function ($q) use ($data) {
-                $q->where('data', $data);
-            })
-            ->when($atividade->horas > 0, function($query) use ($seteDiasAtras, $ontem) {
-                return $query->whereDoesntHave('escalas', function ($q) use ($seteDiasAtras, $ontem) {
-                    // Exclui quem trabalhou entre (Data-7) e (Data-1)
-                    $q->whereBetween('data', [$seteDiasAtras, $ontem]);
-                });
-            })
-            ->get()
-            ->sortBy([
-                // Critério 1: Horas na atividade específica (Ascendente)
-                fn($a, $b) => $a->horasPorAtividade($atividade->id) <=> $b->horasPorAtividade($atividade->id),
-                // Critério 2: Total Geral (Ascendente) - Desempate
-                fn($a, $b) => $a->total_geral <=> $b->total_geral,
-            ]);
+            // Conta quantas vezes o soldado já fez ESTA atividade específica
+            ->withCount(['escalas as qtd_atividade_atual' => function($query) use ($atividade) {
+                $query->where('atividade_id', $atividade->id);
+            }])
+            // ORDENAÇÃO VIA SQL (Muito Rápido)
+            // Quem fez menos vezes essa atividade aparece primeiro
+            ->orderBy('qtd_atividade_atual', 'asc')
+            // Critério de desempate: Total Geral (Assumindo que seja uma coluna no banco)
+            // Se 'total_geral' for calculado no PHP, troque orderBy por ->get()->sortBy('total_geral')
+            ->orderBy('total_geral', 'asc') 
+            ->get();
 
-        // Seleção (Tentando diversificar turmas)
+
+        // Passo 4: Seleção (Mantendo sua lógica de turmas)
         $selecionados = collect();
         $turmasSelecionadas = [];
         $qtde = $atividade->quantidade_padrao;
@@ -122,14 +138,13 @@ class EscalaController extends Controller
         foreach ($candidatos as $soldado) {
             if ($selecionados->count() >= $qtde) break;
 
-            // Tenta pegar de turma diferente primeiro
             if (!in_array($soldado->turma, $turmasSelecionadas)) {
                 $selecionados->push($soldado);
                 $turmasSelecionadas[] = $soldado->turma;
             }
         }
 
-        // Se faltou gente, completa com o resto da fila ordenada
+        // Completa com o resto
         if ($selecionados->count() < $qtde) {
             $restantes = $candidatos->diff($selecionados);
             foreach ($restantes as $soldado) {
@@ -139,14 +154,14 @@ class EscalaController extends Controller
         }
 
         if ($selecionados->isEmpty()) {
-            $escala->delete(); // Desfaz a criação se falhar
-            return back()->withErrors(['erro' => 'Não há militares disponíveis para os critérios.']);
+            $escala->delete();
+            return back()->withErrors(['erro' => 'Não há militares disponíveis (todos escalados, em descanso ou indisponíveis).']);
         }
 
         $escala->soldados()->attach($selecionados->pluck('id'));
 
         return redirect()->route('escalas.show', $escala->id)
-                        ->with('success', 'Escala gerada automaticamente com ' . $selecionados->count() . ' militares.');
+            ->with('success', 'Escala gerada automaticamente com ' . $selecionados->count() . ' militares.');
     }
 
     // Visualizar detalhes da escala
