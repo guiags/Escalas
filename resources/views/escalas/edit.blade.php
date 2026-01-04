@@ -47,7 +47,7 @@
                                 <option value="" class="text-gray-500">-- Selecione um militar --</option>
                                 @foreach($disponiveis as $disponivel)
                                     <option value="{{ $disponivel->id }}">
-                                        {{ $disponivel->graduacao }} {{ $disponivel->nome_guerra }} (Mat: {{ $disponivel->matricula }}) - {{ $disponivel->total_horas }}h
+                                        {{$disponivel->numero_bone}}-{{ $disponivel->graduacao }} {{ $disponivel->nome_guerra }} (Mat: {{ $disponivel->matricula }}) - {{ $disponivel->total_horas }}h
                                     </option>
                                 @endforeach
                             </select>
