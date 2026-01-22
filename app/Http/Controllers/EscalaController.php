@@ -92,9 +92,9 @@ class EscalaController extends Controller
 
         // B. Quem está no descanso (Se atividade conta horas)
         $bloqueadosIntersticio = collect();
-        if ($atividade->carga_horaria = 100) {
+        if ($atividade->carga_horaria > 3) {
             $dataEscala = \Carbon\Carbon::parse($data);
-            $seteDiasAtras = $dataEscala->copy()->subDays(7)->format('Y-m-d');
+            $seteDiasAtras = $dataEscala->copy()->subDays(10)->format('Y-m-d');
             $seteDiasDepois = $dataEscala->copy()->addDays(7)->format('Y-m-d');;
 
             $bloqueadosIntersticio = DB::table('escala_soldado')
@@ -106,7 +106,7 @@ class EscalaController extends Controller
         }
 
         // Lista única de IDs proibidos
-        $idsBloqueados = $bloqueadosHoje->unique()->toArray();
+        $idsBloqueados = $bloqueadosHoje->merge($bloqueadosIntersticio)->unique()->toArray();
 
         // 2. Busca Candidatos
         // Usamos withCount para contar quantas vezes ele já fez ESSA atividade específica
@@ -128,7 +128,7 @@ class EscalaController extends Controller
             ['qtd_atividade_atual', 'asc'],
             
             // Critério 2: Menos horas TOTAIS (usamos o atributo do seu model)
-            //fn($a, $b) => $a->total_geral <=> $b->total_geral,
+            fn($a, $b) => $a->total_geral <=> $b->total_geral,
         ]);
 
         // 4. Seleção das Turmas
@@ -139,10 +139,14 @@ class EscalaController extends Controller
         foreach ($candidatos as $soldado) {
             if ($selecionados->count() >= $qtde) break;
 
-            if (!in_array($soldado->turma, $turmasSelecionadas)) {
+            if (!in_array($soldado->turma, $turmasSelecionadas) $$ !in_array($soldado->id, $bloqueadosIntersticio)) {
                 $selecionados->push($soldado);
                 $turmasSelecionadas[] = $soldado->turma;
             }
+
+            if($turmasSelecionados->count()=5){
+                $turmasSelecionadas = [];
+            }    
         }
 
         if ($selecionados->count() < $qtde) {
