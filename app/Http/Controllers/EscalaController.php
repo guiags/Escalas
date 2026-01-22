@@ -144,7 +144,7 @@ class EscalaController extends Controller
                 $turmasSelecionadas[] = $soldado->turma;
             }
 
-            if($turmasSelecionadas->count() == 5){
+            if(count($turmasSelecionadas) == 5){
                 $turmasSelecionadas = [];
             }    
         }
