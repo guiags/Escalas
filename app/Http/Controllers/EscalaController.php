@@ -128,7 +128,7 @@ class EscalaController extends Controller
             ['qtd_atividade_atual', 'asc'],
             
             // Critério 2: Menos horas TOTAIS (usamos o atributo do seu model)
-            fn($a, $b) => $a->total_geral <=> $b->total_geral,
+            //fn($a, $b) => $a->total_geral <=> $b->total_geral,
         ]);
 
         // 4. Seleção das Turmas
