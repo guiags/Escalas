@@ -139,7 +139,7 @@ class EscalaController extends Controller
         foreach ($candidatos as $soldado) {
             if ($selecionados->count() >= $qtde) break;
 
-            if (!in_array($soldado->turma, $turmasSelecionadas) $$ !in_array($soldado->id, $bloqueadosIntersticio->toArray())) {
+            if (!in_array($soldado->turma, $turmasSelecionadas) && !in_array($soldado->id, $bloqueadosIntersticio->toArray())) {
                 $selecionados->push($soldado);
                 $turmasSelecionadas[] = $soldado->turma;
             }
