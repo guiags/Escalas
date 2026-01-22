@@ -95,13 +95,13 @@ class EscalaController extends Controller
         if ($atividade->carga_horaria > 3) {
             $dataEscala = \Carbon\Carbon::parse($data);
             $seteDiasAtras = $dataEscala->copy()->subDays(10)->format('Y-m-d');
-            $seteDiasDepois = $dataEscala->copy()->addDays(7)->format('Y-m-d');;
+            $seteDiasDepois = $dataEscala->copy()->addDays(7)->format('Y-m-d');
 
             $bloqueadosIntersticio = DB::table('escala_soldado')
                 ->join('escalas', 'escala_soldado.escala_id', '=', 'escalas.id')
                 ->join('atividades', 'escalas.atividade_id', '=', 'atividades.id') // <--- CORREÇÃO CRUCIAL
                 ->whereBetween('escalas.data', [$seteDiasAtras, $seteDiasDepois])
-                ->where('atividades.carga_horaria', '>', 0) // Verifica se a atividade PASSADA contava horas
+                ->where('atividades.carga_horaria', '>', 3) // Verifica se a atividade PASSADA contava horas
                 ->pluck('escala_soldado.soldado_id');
         }
 
