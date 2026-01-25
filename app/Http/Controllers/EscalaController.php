@@ -101,7 +101,7 @@ class EscalaController extends Controller
                 ->join('escalas', 'escala_soldado.escala_id', '=', 'escalas.id')
                 ->join('atividades', 'escalas.atividade_id', '=', 'atividades.id') // <--- CORREÇÃO CRUCIAL
                 ->whereBetween('escalas.data', [$seteDiasAtras, $seteDiasDepois])
-                ->where('atividades.carga_horaria', '>', 3) // Verifica se a atividade PASSADA contava horas
+                ->where('atividades.carga_horaria', '=', 3) // Verifica se a atividade PASSADA contava horas
                 ->pluck('escala_soldado.soldado_id');
         }
 
