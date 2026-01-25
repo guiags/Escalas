@@ -92,9 +92,9 @@ class EscalaController extends Controller
 
         // B. Quem está no descanso (Se atividade conta horas)
         $bloqueadosIntersticio = collect();
-        if ($atividade->carga_horaria > 3) {
+        if ($atividade->carga_horaria = 3) {
             $dataEscala = \Carbon\Carbon::parse($data);
-            $seteDiasAtras = $dataEscala->copy()->subDays(10)->format('Y-m-d');
+            $seteDiasAtras = $dataEscala->copy()->subDays(7)->format('Y-m-d');
             $seteDiasDepois = $dataEscala->copy()->addDays(7)->format('Y-m-d');
 
             $bloqueadosIntersticio = DB::table('escala_soldado')
