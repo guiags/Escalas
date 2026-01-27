@@ -174,11 +174,11 @@
                                     <th class="border border-black px-2 py-1 text-center font-bold w-24">DATA</th>
                                     
                                     <th class="border border-black px-2 py-1 text-center font-bold w-24">ATIVIDADE</th>
-                                    
+                                    <th class="border border-black px-2 py-1 text-center font-bold w-24">MATRÍCULA</th>
                                     <th class="border border-black px-2 py-1 text-left font-bold w-[35%]">MILITAR</th>
                                     
                                     <th class="border border-black px-2 py-1 text-center font-bold w-16">TURMA</th>
-                                    <th class="border border-black px-2 py-1 text-center font-bold w-24">MATRÍCULA</th>
+                                    
                                 </tr>
                             </thead>
                             <tbody>
@@ -196,13 +196,15 @@
                                             {{ $escala->atividade->nome }}
                                         </td>
 
+                                        <td class="border border-black px-2 py-1 text-center align-middle">{{ $soldado->matricula }}</td>
+
                                         <td class="border border-black px-2 py-2 font-bold uppercase align-middle">
                                             {{ $soldado->graduacao }} {{ $soldado->nome_guerra }}
                                         </td>
                                         
                                         <td class="border border-black px-2 py-1 text-center align-middle">{{ $soldado->turma }}</td>
                                         
-                                        <td class="border border-black px-2 py-1 text-center align-middle">{{ $soldado->matricula }}</td>
+                                        
                                     </tr>
                                     @endforeach
 

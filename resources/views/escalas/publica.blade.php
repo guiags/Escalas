@@ -162,7 +162,7 @@
 
             <div class="mt-8 text-center border-t border-gray-200 dark:border-gray-700 pt-6">
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                    Documento gerado eletronicamente em {{ now()->format('d/m/Y H:i') }}. 
+                    Documento gerado eletronicamente em {{ now()->setTimezone('America/Sao_Paulo')->format('d/m/Y H:i') }}. 
                     <br>Sistema de Gestão de Escalas - Uso Interno e Público.
                 </p>
             </div>
