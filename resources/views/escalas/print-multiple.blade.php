@@ -232,21 +232,19 @@
                     @endif
 
                     @php
-                        // Define a localidade para português do Brasil
-                        $formatter = new IntlDateFormatter(
-                            'pt_BR',
-                            IntlDateFormatter::LONG,
-                            IntlDateFormatter::NONE,
-                            null,
-                            null,
-                            "d 'de' MMMM 'de' Y"
-                        );
+                        $meses = [
+                            1 => 'janeiro', 2 => 'fevereiro', 3 => 'março', 4 => 'abril',
+                            5 => 'maio', 6 => 'junho', 7 => 'julho', 8 => 'agosto',
+                            9 => 'setembro', 10 => 'outubro', 11 => 'novembro', 12 => 'dezembro'
+                        ];
 
-                        $dataHoje = $formatter->format(new DateTime());
+                        $dia = date('d');
+                        $mes = $meses[(int)date('m')];
+                        $ano = date('Y');
                     @endphp
 
                     <div style="text-align: right;">
-                        Divinópolis, <?php echo $dataHoje; ?>
+                        Divinópolis, <?php echo "$dia de $mes de $ano"; ?>
                     </div>
 
 
