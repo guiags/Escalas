@@ -231,6 +231,25 @@
                     </div>
                     @endif
 
+                    @php
+                        // Define a localidade para português do Brasil
+                        $formatter = new IntlDateFormatter(
+                            'pt_BR',
+                            IntlDateFormatter::LONG,
+                            IntlDateFormatter::NONE,
+                            null,
+                            null,
+                            "d 'de' MMMM 'de' Y"
+                        );
+
+                        $dataHoje = $formatter->format(new DateTime());
+                    @endphp
+
+                    <div style="text-align: right;">
+                        Divinópolis, <?php echo $dataHoje; ?>
+                    </div>
+
+
                     <div class="mt-12 mb-4 text-center assinatura-block">
                         <p class="font-bold uppercase text-sm">JOSÉ ARTHUR FIGUEIRAS DEOLINO – CAP PM</p>
                         <p class="font-bold uppercase text-sm">CMT DA 231ª CIA ET</p>
