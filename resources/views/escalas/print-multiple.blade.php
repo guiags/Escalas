@@ -243,12 +243,12 @@
                         $ano = date('Y');
                     @endphp
 
-                    <div class="mt-4 mb-4 text-sm" style="text-align: right;">
+                    <div class="mt-4 mb-4 text-center text-sm" style="text-align: right;">
                         Divinópolis, <?php echo "$dia de $mes de $ano"; ?>
                     </div>
 
 
-                    <div class="mt-8 mb-4 text-center assinatura-block">
+                    <div class="mt-8 mb-2 text-center assinatura-block">
                         <p class="font-bold uppercase text-sm">JOSÉ ARTHUR FIGUEIRAS DEOLINO – CAP PM</p>
                         <p class="font-bold uppercase text-sm">CMT DA 231ª CIA ET</p>
                     </div>
