@@ -243,7 +243,7 @@
                         $ano = date('Y');
                     @endphp
 
-                    <div class="mt-4 mb-4 text-center text-sm" style="text-align: right;">
+                    <div class="mt-4 mb-4 text-center text-sm">
                         Divinópolis, <?php echo "$dia de $mes de $ano"; ?>
                     </div>
 
