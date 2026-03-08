@@ -199,7 +199,7 @@
                                         <td class="border border-black px-2 py-1 text-center align-middle">{{ $soldado->matricula }}</td>
 
                                         <td class="border border-black px-2 py-2 font-bold uppercase align-middle">
-                                            {{ $ soldado->numero_bone }} - {{ $soldado->graduacao }} {{ $soldado->nome_guerra }}
+                                            {{ $soldado->numero_bone }} - {{ $soldado->graduacao }} {{ $soldado->nome_guerra }}
                                         </td>
                                         
                                         <td class="border border-black px-2 py-1 text-center align-middle">{{ $soldado->turma }}</td>
