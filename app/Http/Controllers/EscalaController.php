@@ -195,6 +195,10 @@ class EscalaController extends Controller
             $q->where('data', $escala->data);
         });
 
+         if(strpos($escala->atividade->nome, 'Empenho') || strpos($escala->atividade->nome, 'SAPA')){
+            $query = Soldado::where('disponivel', true);
+        }
+
         if ($escala->atividade->sexo_restrito) {
             $query->where('sexo', $escala->atividade->sexo_restrito);
         }
