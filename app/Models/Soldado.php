@@ -10,7 +10,7 @@ class Soldado extends Model
 {
    protected $fillable = [
         'nome_completo', 'nome_guerra', 'matricula', 
-        'numero_bone', 'sexo', 'turma', 'graduacao', 'disponivel', 'horas_iniciais'
+        'numero_bone', 'sexo', 'turma', 'graduacao', 'disponivel', 'horas_iniciais', 'categoria_hab'
     ];
 
     // Relacionamento com Escalas
