@@ -72,6 +72,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::post('/gerar-pdf-certificado', [CertificadoController::class, 'gerar'])->name('certificado.pdf');
-Route::get('/minha-escalatravar/{matricula}', [EscalaController::class, 'publicShow'])->name('escala.publica');
+Route::get('/minha-escala/{matricula}', [EscalaController::class, 'publicShow'])->name('escala.publica');
     
 require __DIR__.'/auth.php';
