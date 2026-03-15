@@ -174,9 +174,9 @@
                                     <th class="border border-black px-2 py-1 text-center font-bold w-24">DATA</th>
                                     
                                     <th class="border border-black px-2 py-1 text-center font-bold w-24">ATIVIDADE</th>
-                                    <th class="border border-black px-2 py-1 text-center font-bold w-24">MATRÍCULA</th>
+                                    <th class="border border-black px-2 py-1 text-center font-bold w-20">MATRÍCULA</th>
                                     <th class="border border-black px-2 py-1 text-left font-bold w-[35%]">MILITAR</th>
-                                    <th class="border border-black px-2 py-1 text-center font-bold w-8">CAT HAB</th>
+                                    <th class="border border-black px-2 py-1 text-center font-bold w-12">HAB</th>
                                     <th class="border border-black px-2 py-1 text-center font-bold w-8">TURMA</th>
                                     
                                 </tr>
