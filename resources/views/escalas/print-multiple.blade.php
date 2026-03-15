@@ -176,8 +176,8 @@
                                     <th class="border border-black px-2 py-1 text-center font-bold w-24">ATIVIDADE</th>
                                     <th class="border border-black px-2 py-1 text-center font-bold w-24">MATRÍCULA</th>
                                     <th class="border border-black px-2 py-1 text-left font-bold w-[35%]">MILITAR</th>
-                                    
-                                    <th class="border border-black px-2 py-1 text-center font-bold w-16">TURMA</th>
+                                    <th class="border border-black px-2 py-1 text-center font-bold w-8">CAT HAB</th>
+                                    <th class="border border-black px-2 py-1 text-center font-bold w-8">TURMA</th>
                                     
                                 </tr>
                             </thead>
@@ -201,6 +201,8 @@
                                         <td class="border border-black px-2 py-2 font-bold uppercase align-middle">
                                             {{ $soldado->numero_bone }} - {{ $soldado->graduacao }} {{ $soldado->nome_guerra }}
                                         </td>
+
+                                        <td class="border border-black px-2 py-1 text-center align-middle">{{ $soldado->categoria_hab }}</td>
                                         
                                         <td class="border border-black px-2 py-1 text-center align-middle">{{ $soldado->turma }}</td>
                                         
